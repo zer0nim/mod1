@@ -1,0 +1,18 @@
+[submodule "lib/glad"]
+	path = lib/glad
+	url = https://github.com/Dav1dde/glad.git
+[submodule "lib/stb"]
+	path = lib/stb
+	url = https://github.com/nothings/stb.git
+[submodule "lib/sdl"]
+	path = lib/sdl
+	url = https://github.com/SDL-mirror/SDL.git
+[submodule "lib/glm"]
+	path = lib/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "lib/freetype"]
+	path = lib/freetype
+	url = git://git.sv.nongnu.org/freetype/freetype2.git
+[submodule "lib/assimp"]
+	path = lib/assimp
+	url = https://github.com/assimp/assimp.git
