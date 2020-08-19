@@ -2,6 +2,7 @@
 #define TERRAIN_HPP_
 
 #include <string>
+#include <unordered_set>
 
 #include "mod1.hpp"
 
@@ -27,6 +28,7 @@ class Terrain {
 
 		std::string		_mapPath;
 		SettingsJson	*_map;
+		std::unordered_set<glm::uvec3>	_mapPoints;
 };
 
 #endif  // TERRAIN_HPP_

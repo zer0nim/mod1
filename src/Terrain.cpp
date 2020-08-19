@@ -49,14 +49,17 @@ void	Terrain::_loadFile() {
 
 	if (failure) {
 		throw TerrainException(std::string("Invalid map format for: \"" +
-			_mapPath + '"').c_str());
+			_mapPath + "\", see example format at 'asset/map/example1.mod1'").c_str());
 	}
 
-	for (SettingsJson * test : _map->lj("map").list) {
-		logDebug("x: " << test->u("x") <<
-			", y: " << test->u("y") <<
-			", z: " << test->u("z"));
+	for (SettingsJson * p : _map->lj("map").list) {
+		auto eRes = _mapPoints.emplace(p->u("x"), p->u("y"), p->u("z"));
+		if (!std::get<1>(eRes))
+			logWarn("duplicate points in \"" << _mapPath << "\", skipped");
 	}
+
+	for (const glm::uvec3 & p: _mapPoints)
+		logDebug(glm::to_string(p));
 }
 
 // -- exceptions ---------------------------------------------------------------
