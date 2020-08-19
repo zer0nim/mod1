@@ -24,7 +24,6 @@ void	initLogs() {
 	#else
 		logging.setLoglevel(LOGINFO);
 	#endif
-	logDebug("using debug mode");
 }
 
 /**
@@ -173,7 +172,7 @@ bool	hasSuffix(std::string const & str, std::string const & suffix) {
  * @return false If need to quit
  */
 bool	argParse(int nbArgs, char const ** args, std::vector<std::string> & mapsPath) {
-	for (uint32_t i = 0; i < nbArgs; ++i) {
+	for (int i = 0; i < nbArgs; ++i) {
 		if (strcmp(args[i], "--usage") == 0 || strcmp(args[i], "-u") == 0) {
 			return usage();
 		}
