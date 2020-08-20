@@ -31,6 +31,9 @@
 #define SETTINGS_FILE			CONFIG_DIR"settings.json"
 #define CONTROLS_FILE			CONFIG_DIR"controls.json"
 
+#define MAX_POINTS_NB 50
+#define BOX_MAX_SIZE glm::uvec3(32, 128, 32)
+
 void	initLogs();
 bool	checkPrgm();
 bool	initSettings(std::string const & filename);

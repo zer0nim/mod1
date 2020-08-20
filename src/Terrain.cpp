@@ -31,9 +31,9 @@ void	Terrain::_loadFile() {
 	_map = new SettingsJson();
 
 	SettingsJson * coord3d = new SettingsJson();
-	coord3d->add<uint64_t>("x").setMin(0).setMax(100);
-	coord3d->add<uint64_t>("y").setMin(0).setMax(100);
-	coord3d->add<uint64_t>("z").setMin(0).setMax(100);
+	coord3d->add<uint64_t>("x").setMin(0).setMax(BOX_MAX_SIZE.x);
+	coord3d->add<uint64_t>("y").setMin(0).setMax(BOX_MAX_SIZE.y);
+	coord3d->add<uint64_t>("z").setMin(0).setMax(BOX_MAX_SIZE.z);
 
 	_map->addList<SettingsJson>("map", coord3d);
 
@@ -49,15 +49,22 @@ void	Terrain::_loadFile() {
 
 	if (failure) {
 		throw TerrainException(std::string("Invalid map format for: \"" +
-			_mapPath + "\", see example format at 'asset/map/example1.mod1'").c_str());
+			_mapPath + "\", see example format at \"asset/map/example1.mod1\"").c_str());
 	}
 
 	for (SettingsJson * p : _map->lj("map").list) {
+		// limit points numbers to MAX_POINTS_NB
+		if (_mapPoints.size() == MAX_POINTS_NB) {
+			throw TerrainException(std::string("Map \"" + _mapPath + "\", too many points, max number: " +
+				std::to_string(MAX_POINTS_NB)).c_str());
+		}
+
 		auto eRes = _mapPoints.emplace(p->u("x"), p->u("y"), p->u("z"));
 		if (!std::get<1>(eRes))
 			logWarn("duplicate points in \"" << _mapPath << "\", skipped");
 	}
 
+	logDebug("-- map: " << _mapPath << " ----");
 	for (const glm::uvec3 & p: _mapPoints)
 		logDebug(glm::to_string(p));
 }
