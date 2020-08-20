@@ -1,6 +1,8 @@
 #include <vector>
 #include "mod1.hpp"
 #include "Terrain.hpp"
+#include "Gui.hpp"
+#include "Scene.hpp"
 
 bool	init(int ac, char const **av, std::vector<Terrain *> & terrains) {
 	std::vector<std::string>	mapsPath;
@@ -26,6 +28,16 @@ bool	init(int ac, char const **av, std::vector<Terrain *> & terrains) {
 	return checkPrgm();
 }
 
+bool	simulation() {
+	Scene	scene;
+
+	if (!scene.init()) {
+		return false;
+	}
+
+	return scene.run();
+}
+
 int main(int ac, char const **av) {
 	int	ret = EXIT_SUCCESS;
 	std::vector<Terrain *>	terrains;
@@ -35,8 +47,12 @@ int main(int ac, char const **av) {
 		ret = EXIT_FAILURE;
 
 	if (ret != EXIT_FAILURE) {
+		// launch simulation
+		ret = simulation();
+
 		// save settings before exiting
-		saveSettings(SETTINGS_FILE);
+		if (ret != EXIT_FAILURE)
+			saveSettings(SETTINGS_FILE);
 	}
 
 	// free variables

@@ -7,9 +7,8 @@
  *
  * @param gameInfo The gameinfo object
  */
-Gui::Gui(GameInfo &gameInfo)
-: gameInfo(gameInfo),
-  textureManager(nullptr),
+Gui::Gui()
+: textureManager(nullptr),
   cubeShader(nullptr),
   cam(nullptr),
   _win(nullptr),
@@ -82,7 +81,7 @@ void Gui::update() {
 	// need to quit ?
 	if (Inputs::shouldQuit() ||
 		(!Inputs::isConfiguring() && Inputs::getKeyUp(InputType::CANCEL))) {
-		//need to quit here
+		gameInfo.quit = true;
 	}
 }
 
@@ -94,8 +93,6 @@ void Gui::update() {
  * @return false if there is an error in init
  */
 bool	Gui::init() {
-	logDebug("create gui");
-
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		logErr("while loading SDL: " << SDL_GetError());
 		SDL_Quit();
@@ -446,7 +443,7 @@ std::array<float, C_FACE_A_SIZE> const	Gui::_cubeFaces = {{
 
 // -- GameInfo struct ----------------------------------------------------------
 GameInfo::GameInfo() {
-	title = "bomberman";
+	title = s.s("name");
 	windowSize = {
 		s.j("graphics").i("width"),
 		s.j("graphics").i("height")

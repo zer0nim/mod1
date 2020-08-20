@@ -10,7 +10,7 @@
 TextureManager::TextureManager()
 : _textureAtlas(0) {
 	// load texture atlas
-	std::string path = "assets/textures/textures.png";
+	std::string path = "asset/textures/textures.png";
 	bool inSpaceSRGB = true;
 	try {
 		_textureAtlas = textureAtlasFromFile(path, inSpaceSRGB, 32, 256);

@@ -69,8 +69,10 @@ bool	checkPrgm() {
 bool	initSettings(std::string const & filename) {
 	s.name("settings").description("main settings");
 
+	s.add<std::string>("name", "mod1");
+
 	s.add<SettingsJson>("screen");
-		s.j("screen").add<uint64_t>("fps", 60).setMin(30).setMax(120).setDescription("framerate");
+		s.j("screen").add<uint64_t>("maxFps", 60).setMin(30).setMax(120).setDescription("framerate");
 
 	/* font */
 	s.add<SettingsJson>("fonts");
@@ -104,11 +106,12 @@ bool	initSettings(std::string const & filename) {
 	/* Graphics */
 	s.add<SettingsJson>("graphics");
 	s.j("graphics").add<bool>("fullscreen", false).setDescription("Display the game on fullscreen or not.");
+	s.j("graphics").add<bool>("fitToScreen", false).setDescription("The resolution fit to the screen size");
 	s.j("graphics").add<int64_t>("width", 1200).setMin(800).setMax(2560).setDescription("The resolution's width.");
 	s.j("graphics").add<int64_t>("height", 800).setMin(600).setMax(1440).setDescription("The resolution's height.");
 
 	/* mouse sensitivity */
-	s.add<double>("mouse_sensitivity", 0.1).setMin(0.0).setMax(3.0) \
+	s.add<double>("mouse_sensitivity", 0.7).setMin(0.0).setMax(3.0) \
 		.setDescription("Camera mouse sensitivity.");
 
 	try {

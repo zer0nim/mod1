@@ -18,11 +18,16 @@ const std::string	Inputs::configFile = CONTROLS_FILE;
 /**
  * @brief Construct a new Inputs:: Inputs object
  */
-Inputs::Inputs(): _configuring(false), _quit(false), _scroll_rel(0, 0),
-	_left_click(false), _right_click(false),
-	_left_click_previous(false), _right_click_previous(false), _isTextInputMode(false)
+Inputs::Inputs()
+: _configuring(false),
+  _quit(false),
+  _scroll_rel(0, 0),
+  _left_click(false), _right_click(false),
+  _left_click_previous(false),
+  _right_click_previous(false),
+  _isTextInputMode(false)
 {
-	for (int i = 0; i < Inputs::nb_input; i++) {
+	for (int i = 0; i < Inputs::nb_input; ++i) {
 		_key_status[i] = false;
 		_key_previous_status[i] = false;
 	}
@@ -51,17 +56,10 @@ Inputs::Inputs(): _configuring(false), _quit(false), _scroll_rel(0, 0),
 		{ static_cast<SDL_Scancode>(_controls.j("keys").i("menu")), InputType::GOTO_MENU },
 	};
 	_used_scan = {
-		_controls.j("keys").i("up"),
-		_controls.j("keys").i("down"),
-		_controls.j("keys").i("left"),
-		_controls.j("keys").i("right"),
 		_controls.j("keys").i("action"),
-		_controls.j("keys").i("action_2"),
 		_controls.j("keys").i("confirm"),
 		_controls.j("keys").i("cancel"),
 		_controls.j("keys").i("menu"),
-		_controls.j("keys").i("show help"),
-		_controls.j("keys").i("cheatcode"),
 	};
 	_controls.saveToFile(Inputs::configFile);
 
@@ -501,17 +499,10 @@ void				Inputs::_resetKeys() {
 		{ static_cast<SDL_Scancode>(_controls.j("keys").i("menu")), InputType::Enum::GOTO_MENU },
 	};
 	_used_scan = {
-		_controls.j("keys").i("up"),
-		_controls.j("keys").i("down"),
-		_controls.j("keys").i("left"),
-		_controls.j("keys").i("right"),
 		_controls.j("keys").i("action"),
-		_controls.j("keys").i("action_2"),
 		_controls.j("keys").i("confirm"),
 		_controls.j("keys").i("cancel"),
 		_controls.j("keys").i("menu"),
-		_controls.j("keys").i("show help"),
-		_controls.j("keys").i("cheatcode"),
 	};
 	_controls.saveToFile(Inputs::configFile);
 }

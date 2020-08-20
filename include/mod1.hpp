@@ -19,12 +19,6 @@
 #ifndef DEBUG
 	#define DEBUG !NDEBUG
 #endif
-/* print log when fps level is too low */
-#define DEBUG_FPS_LOW	DEBUG & false  // always false in normal mode
-/* open the exit menu before quitting */
-#define ASK_BEFORE_QUIT	!DEBUG | true  // always true in normal mode
-/* show help (shortcuts in buttons) */
-#define DEBUG_SHOW_HELP	DEBUG & true  // always false in normal mode
 
 #define CONFIG_DIR				"configs/"
 

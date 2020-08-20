@@ -22,8 +22,6 @@
 #include "Inputs.hpp"
 #include "TextureManager.hpp"
 
-#define TITLE	"bomberman"
-
 /**
  * @brief General information about the game
  */
@@ -43,7 +41,7 @@ struct GameInfo {
  */
 class Gui {
 	public:
-		explicit	Gui(GameInfo &gameInfo);
+		Gui();
 		virtual ~Gui();
 		Gui(Gui const &src);
 		Gui &operator=(Gui const &rhs);
@@ -59,7 +57,7 @@ class Gui {
 		void	updateFullscreen();
 		void	udpateDimension();
 
-		GameInfo		&gameInfo;  /**< GameInfo object */
+		GameInfo		gameInfo;  /**< GameInfo object */
 		TextureManager	*textureManager;  /**< TextureManager object */
 		Shader			*cubeShader;  /**< CubeShader object */
 		Camera			*cam;  /**< Camera object */
@@ -76,7 +74,6 @@ class Gui {
 
 		static std::array<float, C_FACE_A_SIZE> const		_cubeFaces;  /**< All cubes faces */
 
-		Gui();  // private, should not be called
 		bool	_init();
 		bool	_initOpengl();
 		bool	_initShaders();
