@@ -28,8 +28,21 @@ bool	init(int ac, char const **av, std::vector<Terrain *> & terrains) {
 	return checkPrgm();
 }
 
-bool	simulation() {
+bool	simulation(std::vector<Terrain *> & terrains) {
 	Scene	scene;
+
+	// test calculateHeight function
+	for (Terrain * & terrain : terrains) {
+		logDebug("");
+		for (uint16_t v = 0; v < BOX_MAX_SIZE.z; ++v) {
+			for (uint16_t u = 0; u < BOX_MAX_SIZE.x; ++u) {
+				glm::uvec2 pos(u, v);
+				logDebug("calculateHeight( " << glm::to_string(pos) << " ) -> " <<
+					std::to_string(terrain->calculateHeight(pos)));
+			}
+		}
+		logDebug("");
+	}
 
 	if (!scene.init()) {
 		return false;
@@ -48,7 +61,7 @@ int main(int ac, char const **av) {
 
 	if (ret != EXIT_FAILURE) {
 		// launch simulation
-		ret = simulation();
+		ret = simulation(terrains);
 
 		// save settings before exiting
 		if (ret != EXIT_FAILURE)
