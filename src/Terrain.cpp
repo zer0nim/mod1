@@ -4,19 +4,43 @@
 
 // -- Constructors -------------------------------------------------------------
 
-Terrain::Terrain(std::string const mapPath)
-: _mapPath(mapPath),
-  _map(nullptr)
+Terrain::Terrain(std::string const mapPath, Gui & gui)
+: _gui(gui),
+  _mapPath(mapPath),
+  _map(nullptr),
+  _vao(0),
+  _vbo(0),
+  _ebo(0)
 {
+	// init static shader if null
+	if (!_sh) {
+		_sh = std::unique_ptr<Shader>(
+			new Shader("shaders/terrain_vs.glsl", "shaders/terrain_fs.glsl"));
+	}
+
 	_loadFile();
 }
 
 Terrain::~Terrain() {
 	delete _map;
+
+	// free vao / vbo
+	_sh->use();
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glDeleteBuffers(1, &_vbo);
+	glDeleteBuffers(1, &_ebo);
+	glDeleteVertexArrays(1, &_vao);
+	_sh->unuse();
 }
 
 Terrain::Terrain(Terrain const &src)
-: _map(nullptr) {
+: _gui(src._gui),
+  _map(nullptr),
+  _vao(0),
+  _vbo(0),
+  _ebo(0) {
 	*this = src;
 }
 
@@ -40,19 +64,20 @@ void	Terrain::_loadFile() {
 	_map->addList<SettingsJson>("map", coord3d);
 
 	bool failure = false;
+	std::string errMsg;
 	try {
 		if (!_map->loadFile(_mapPath)) {
 			failure = true;
 		}
 	} catch(SettingsJson::SettingsException const & e) {
-		logErr(e.what());
+		errMsg = e.what();
 		failure = true;
 	}
 
 	if (failure) {
 		delete _map;
-		throw TerrainException(std::string("Invalid map format for: \"" +
-			_mapPath + "\", see example format at \"asset/map/example1.mod1\"").c_str());
+		throw TerrainException(std::string(errMsg +
+			", compare with the example: \"asset/map/example1.mod1\"").c_str());
 	}
 
 	for (SettingsJson * p : _map->lj("map").list) {
@@ -70,11 +95,26 @@ void	Terrain::_loadFile() {
 
 	if (_mapPoints.size() == 0)
 		throw TerrainException(std::string("Map \"" + _mapPath + "\", you need to add at least one point").c_str());
+}
 
-	logDebug("-- map: " << _mapPath << " ----");
-	for (const glm::uvec3 & p: _mapPoints)
-		logDebug(glm::to_string(p));
-	logDebug("------");
+bool	Terrain::draw(bool wireframe) {
+	_sh->use();
+
+	// update uniforms
+	_sh->setMat4("view", _gui.cam->getViewMatrix());
+	_sh->setVec3("viewPos", _gui.cam->pos);
+
+	glBindVertexArray(_vao);
+	if (wireframe)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glDrawElements(GL_TRIANGLE_STRIP, _indices.size(), GL_UNSIGNED_INT, 0);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // reset polygon mode
+	glBindVertexArray(0);
+
+
+	_sh->unuse();
+
+	return true;
 }
 
 uint32_t	Terrain::calculateHeight(glm::uvec2 pos) {
@@ -133,6 +173,146 @@ std::vector<Terrain::HeightPoint>	Terrain::_getNClosest(glm::uvec2 pos, uint8_t 
 	return res;
 }
 
+glm::vec3	Terrain::_calculateNormal(uint32_t x, uint32_t z) {
+	float hL, hR, hB, hT;
+
+	x = x == 0 ? 1 : x;
+	z = z == 0 ? 1 : z;
+
+	// hL
+	hL = TERRAIN_H(x - 1, z);
+	// hR
+	if (x < BOX_MAX_SIZE.x - 1)
+		hR = TERRAIN_H(x + 1, z);
+	else
+		hR = TERRAIN_H(x, z);
+	// hT
+	if (z < BOX_MAX_SIZE.z - 1)
+		hT = TERRAIN_H(x, z + 1);
+	else
+		hT = TERRAIN_H(x, z);
+	// hB
+	hB = TERRAIN_H(x, z - 1);
+
+	float sx = hR - hL;
+	if (x == 0 || x == BOX_MAX_SIZE.x - 1)
+		sx *= 2;
+
+	float sy = hB - hT;
+	if (z == 0 || z == BOX_MAX_SIZE.z -1)
+		sy *= 2;
+
+	glm::vec3 norm(-sx, 2.0, sy);
+
+	return glm::normalize(norm);
+}
+
+bool	Terrain::initMesh() {
+	// fill vertices
+	for (uint16_t z = 0; z < BOX_MAX_SIZE.z; ++z) {
+		for (uint16_t x = 0; x < BOX_MAX_SIZE.x; ++x) {
+			TerrainVert	vert;
+			vert.pos = {x, calculateHeight({x, z}), z};
+			_vertices.push_back(vert);
+		}
+	}
+
+	// calc vertices normals
+	for (TerrainVert & vert : _vertices) {
+		vert.norm = _calculateNormal(vert.pos.x, vert.pos.z);
+		vert.norm *= DISPLAY_RES;
+	}
+
+	// fill indices
+	// By repeating the last vertex and the first vertex, we created four
+	// degenerate triangles that will be skipped, and linked the first row
+	// with the second. We could link an arbitrary number of rows this way and
+	// draw the entire mesh with only one call
+	// cf: learnopengles.com/tag/triangle-strips
+	for (uint16_t y = 0; y < BOX_MAX_SIZE.z - 1; ++y) {
+		// duplicate first vertice to generate degenerate triangle
+		if (y > 0)
+			_indices.push_back(y * BOX_MAX_SIZE.x);
+
+		uint32_t a = 0;
+		uint32_t b = 0;
+		for (uint16_t x = 0; x < BOX_MAX_SIZE.x; ++x) {
+			a = x + y * BOX_MAX_SIZE.x;
+			b = a + BOX_MAX_SIZE.x;
+			_indices.push_back(a);
+			_indices.push_back(b);
+		}
+
+		// duplicate last vertice to generate degenerate triangle
+		if (y != BOX_MAX_SIZE.z - 2)
+			_indices.push_back(b);
+	}
+
+	// create vao, vbo, ebo
+	glGenVertexArrays(1, &_vao);
+	glGenBuffers(1, &_vbo);
+	glGenBuffers(1, &_ebo);
+
+	// fill vao buffer
+	glBindVertexArray(_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(TerrainVert),
+		&_vertices[0], GL_STATIC_DRAW);
+
+	// set-up ebo
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(u_int32_t),
+		&_indices[0], GL_STATIC_DRAW);
+
+	// vertex positions
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TerrainVert),
+		reinterpret_cast<void *>(0));
+	// vertex normals
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TerrainVert),
+		reinterpret_cast<void *>(offsetof(TerrainVert, norm)));
+	// vertex texture coords
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TerrainVert),
+		reinterpret_cast<void *>(offsetof(TerrainVert, texCoords)));
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	_staticUniform();
+
+	return true;
+}
+
+void	Terrain::_staticUniform() {
+	_sh->use();
+
+	// camera projection
+	_sh->setMat4("projection", _gui.cam->getProjection());
+
+	// direction light
+	_sh->setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+	_sh->setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+	_sh->setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+	_sh->setVec3("dirLight.specular", 0.3f, 0.3f, 0.3f);
+
+	// terrain material
+	Material material;
+	material.diffuse = {0.5f, 0.5f, 0.5f};
+	material.shininess = 32.0f;
+	// diffuse
+	_sh->setBool("material.diffuse.isTexture", false);
+	_sh->setVec3("material.diffuse.color", material.diffuse);
+	// specular
+	_sh->setBool("material.specular.isTexture", false);
+	_sh->setVec3("material.specular.color", material.specular);
+	// shininess
+	_sh->setFloat("material.shininess", material.shininess);
+
+	_sh->unuse();
+}
 
 // -- exceptions ---------------------------------------------------------------
 /**
@@ -149,3 +329,6 @@ Terrain::TerrainException::TerrainException()
 Terrain::TerrainException::TerrainException(const char* what_arg)
 : std::runtime_error(std::string(std::string("[TerrainException] ") +
 	what_arg).c_str()) {}
+
+// -- static initialisation ----------------------------------------------------
+std::unique_ptr<Shader> Terrain::_sh = nullptr;

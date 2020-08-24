@@ -4,48 +4,39 @@
 #include "Gui.hpp"
 #include "Scene.hpp"
 
-bool	init(int ac, char const **av, std::vector<Terrain *> & terrains) {
+bool	init(int ac, char const **av, Scene & scene, std::vector<Terrain *> & terrains) {
 	std::vector<std::string>	mapsPath;
 
 	initLogs();  // init logs functions
 	srand(time(NULL));  // init random
+
+	file::mkdir(CONFIG_DIR);  // create config folder
+	initSettings(SETTINGS_FILE);  // create settings object
+
+	if (!scene.init()) {
+		return false;
+	}
 
 	if (!argParse(ac - 1, av + 1, mapsPath))  // parse arguments
 		return false;
 	// create Terrain object for each file argument
 	try {
 		for (std::string mapPath : mapsPath) {
-			terrains.push_back(new Terrain(mapPath));
+			terrains.push_back(new Terrain(mapPath, scene.getGui()));
 		}
 	} catch(Terrain::TerrainException const & e) {
 		logErr(e.what());
 		return false;
 	}
 
-	file::mkdir(CONFIG_DIR);  // create config folder
-	initSettings(SETTINGS_FILE);  // create settings object
-
 	return checkPrgm();
 }
 
-bool	simulation(std::vector<Terrain *> & terrains) {
-	Scene	scene;
-
+bool	simulation(std::vector<Terrain *> & terrains, Scene &scene) {
 	// test calculateHeight function
 	for (Terrain * & terrain : terrains) {
-		logDebug("");
-		for (uint16_t v = 0; v < BOX_MAX_SIZE.z; ++v) {
-			for (uint16_t u = 0; u < BOX_MAX_SIZE.x; ++u) {
-				glm::uvec2 pos(u, v);
-				logDebug("calculateHeight( " << glm::to_string(pos) << " ) -> " <<
-					std::to_string(terrain->calculateHeight(pos)));
-			}
-		}
-		logDebug("");
-	}
-
-	if (!scene.init()) {
-		return false;
+		if (!terrain->initMesh())
+			return false;
 	}
 
 	return scene.run();
@@ -54,14 +45,15 @@ bool	simulation(std::vector<Terrain *> & terrains) {
 int main(int ac, char const **av) {
 	int	ret = EXIT_SUCCESS;
 	std::vector<Terrain *>	terrains;
+	Scene	scene(terrains);
 
 	// init program & load settings
-	if (!init(ac, av, terrains))
+	if (!init(ac, av, scene, terrains))
 		ret = EXIT_FAILURE;
 
 	if (ret != EXIT_FAILURE) {
 		// launch simulation
-		ret = simulation(terrains);
+		ret = simulation(terrains, scene);
 
 		// save settings before exiting
 		if (ret != EXIT_FAILURE)

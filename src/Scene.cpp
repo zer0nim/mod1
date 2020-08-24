@@ -3,20 +3,25 @@
 
 #include "Scene.hpp"
 
-Scene::Scene()
-: _dtTime(0.0f),
-  _fps(60) {
+Scene::Scene(std::vector<Terrain *> & terrains)
+: _terrains(terrains),
+  _dtTime(0.0f),
+  _fps(60),
+  _wireframeMode(false) {
 }
 
 Scene::~Scene() {
 }
 
-Scene::Scene(Scene const &src) {
+Scene::Scene(Scene const &src)
+: _terrains(src._terrains) {
 	*this = src;
 }
 
 Scene &Scene::operator=(Scene const &rhs) {
-	if (this != &rhs) {}
+	if (this != &rhs) {
+		logWarn("Terrain operator= called");
+	}
 	return *this;
 }
 
@@ -64,10 +69,17 @@ bool	Scene::_update() {
 	Inputs::update();
 	_gui.update();
 	_gui.cam->update(_dtTime);
+	if (Inputs::getKeyByScancodeDown(SDL_SCANCODE_1))
+		_wireframeMode = !_wireframeMode;
 	return true;
 }
 
 bool	Scene::_draw() {
+	for (Terrain * & terrain : _terrains) {
+		if (!terrain->draw(_wireframeMode))
+			return false;
+	}
+
 	// draw skybox
 	glm::mat4	view = _gui.cam->getViewMatrix();
 	_gui.drawSkybox(view);
@@ -75,6 +87,7 @@ bool	Scene::_draw() {
 }
 
 // -- getters ----------------------------------------------------------
+Gui &	Scene::getGui() { return _gui; }
 float	Scene::getDtTime() const { return _dtTime; }
 
 uint16_t	Scene::getFps() const {

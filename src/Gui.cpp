@@ -23,12 +23,14 @@ Gui::~Gui() {
 	logDebug("exit SDL");
 
 	// free vao / vbo
-	cubeShader->use();
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glDeleteBuffers(1, &cubeShVbo);
-	glDeleteVertexArrays(1, &cubeShVao);
-	cubeShader->unuse();
+	if (cubeShader != nullptr) {
+		cubeShader->use();
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+		glDeleteBuffers(1, &cubeShVbo);
+		glDeleteVertexArrays(1, &cubeShVao);
+		cubeShader->unuse();
+	}
 
 	delete _event;
 	delete textureManager;
@@ -93,6 +95,9 @@ void Gui::update() {
  * @return false if there is an error in init
  */
 bool	Gui::init() {
+	if (!_initGameInfo())
+		return false;
+
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		logErr("while loading SDL: " << SDL_GetError());
 		SDL_Quit();
@@ -116,6 +121,27 @@ bool	Gui::init() {
 	return true;
 }
 
+/**
+ * @brief init gameInfo struct with settings from SettingsJson
+ *
+ * @return true on success
+ * @return false failure
+ */
+bool	Gui::_initGameInfo() {
+	try {
+		gameInfo.title = s.s("name");
+		gameInfo.windowSize = {
+			s.j("graphics").i("width"),
+			s.j("graphics").i("height")
+		};
+		gameInfo.quit = false;
+	}
+	catch(SettingsJson::SettingsException const & e) {
+		logDebug("[Gui::_initGameInfo]" << e.what());
+		return false;
+	}
+	return true;
+}
 
 // -- _initOpengl --------------------------------------------------------------
 /**
@@ -440,13 +466,3 @@ std::array<float, C_FACE_A_SIZE> const	Gui::_cubeFaces = {{
 	0, 1, 1,	4,
 	0, 0, 0,	5,
 }};
-
-// -- GameInfo struct ----------------------------------------------------------
-GameInfo::GameInfo() {
-	title = s.s("name");
-	windowSize = {
-		s.j("graphics").i("width"),
-		s.j("graphics").i("height")
-	};
-	quit = false;
-}

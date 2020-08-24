@@ -32,8 +32,6 @@ struct GameInfo {
 	glm::ivec2	savedWindowSize;  /**< Saved win size (for next program opening) */
 	bool		isSavedFullscreen;  /**< True if we want fullscreen in next program opening */
 	bool		quit;  /**< True if we want to quit game */
-
-	GameInfo();
 };
 
 /**
@@ -75,6 +73,7 @@ class Gui {
 		static std::array<float, C_FACE_A_SIZE> const		_cubeFaces;  /**< All cubes faces */
 
 		bool	_init();
+		bool	_initGameInfo();
 		bool	_initOpengl();
 		bool	_initShaders();
 
