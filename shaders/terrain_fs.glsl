@@ -7,19 +7,12 @@ out vec4	fragColor;
 in VS_OUT {
 	vec3 FragPos;
 	vec3 Normal;
-	vec2 TexCoords;
+	vec3 Color;
 } fs_in;
 
-struct	ColorData {
-	bool		isTexture;
-	vec3		color;
-	sampler2D	texture;
-};
-
 struct	Material {
-	ColorData	diffuse;
-	ColorData	specular;
-	float		shininess;
+	vec3	specular;
+	float	shininess;
 };
 
 struct DirLight {
@@ -45,23 +38,12 @@ vec3 calcDirLight(DirLight light, vec3 norm, vec3 viewDir) {
 	// use texture or color for the diffuse
 	vec3	ambient = light.ambient * GAMMA;
 	vec3	diffuse = light.diffuse * GAMMA;
-	if (material.diffuse.isTexture) {
-		ambient *= vec3(texture(material.diffuse.texture, fs_in.TexCoords));
-		diffuse *= diff * vec3(texture(material.diffuse.texture, fs_in.TexCoords));
-	}
-	else {
-		ambient *= pow(material.diffuse.color, vec3(GAMMA));
-		diffuse *= diff * pow(material.diffuse.color, vec3(GAMMA));
-	}
+	ambient *= pow(fs_in.Color, vec3(GAMMA));
+	diffuse *= diff * pow(fs_in.Color, vec3(GAMMA));
 
 	// use texture or color for the specular
 	vec3 specular = light.specular * GAMMA;
-	if (material.specular.isTexture) {
-		specular *= spec * vec3(texture(material.specular.texture, fs_in.TexCoords));
-	}
-	else {
-		specular *= spec * pow(material.specular.color, vec3(GAMMA));
-	}
+	specular *= spec * pow(material.specular, vec3(GAMMA));
 
 	return (ambient + diffuse + specular);
 }
@@ -69,12 +51,6 @@ vec3 calcDirLight(DirLight light, vec3 norm, vec3 viewDir) {
 void main() {
 	// retrieve alpha
 	float alpha = 1.0f;
-	if (material.diffuse.isTexture) {
-		alpha = texture(material.diffuse.texture, fs_in.TexCoords).a;
-	}
-	// skip pixel if to transparent
-	if (alpha < 0.01)
-		discard;
 
 	// retrieve normal
 	vec3	norm = normalize(fs_in.Normal);

@@ -217,6 +217,9 @@ bool	Terrain::initMesh() {
 		}
 	}
 
+	// fill vert colors
+	_initColors();
+
 	// calc vertices normals
 	for (TerrainVert & vert : _vertices) {
 		vert.norm = _calculateNormal(vert.pos.x, vert.pos.z);
@@ -274,8 +277,8 @@ bool	Terrain::initMesh() {
 		reinterpret_cast<void *>(offsetof(TerrainVert, norm)));
 	// vertex texture coords
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TerrainVert),
-		reinterpret_cast<void *>(offsetof(TerrainVert, texCoords)));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(TerrainVert),
+		reinterpret_cast<void *>(offsetof(TerrainVert, color)));
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -285,6 +288,39 @@ bool	Terrain::initMesh() {
 
 	return true;
 }
+
+void	Terrain::_initColors() {
+	std::array<glm::vec3, 3>	colors = {
+		glm::vec3(0.92f, 0.85f, 0.69f),  // rgb(235, 217, 177)
+		glm::vec3(0.61f, 0.76f, 0.2f),  // rgb(156, 195, 53)
+		glm::vec3(0.54f, 0.5f, 0.56f)  // rgb(136, 130, 144)
+	};
+
+	// calc min/max height
+	float minH = _vertices[0].pos.y;
+	float maxH = minH;
+	for (TerrainVert & vert : _vertices) {
+		if (vert.pos.y < minH)
+			minH = vert.pos.y;
+		if (vert.pos.y > maxH)
+			maxH = vert.pos.y;
+	}
+
+	float diffH = maxH - minH;
+	float step = 1.0 / (colors.size() - 1);
+	for (TerrainVert & vert : _vertices) {
+		float ratio = (vert.pos.y - minH) / diffH;
+
+		for (uint8_t i = 0; i < colors.size() - 1; ++i) {
+			if (ratio <= step * (i + 1)) {
+				ratio /= step * (i + 1);
+				vert.color = glm::lerp(colors[i], colors[i+1], ratio);
+				break;
+			}
+		}
+	}
+}
+
 
 void	Terrain::_staticUniform() {
 	_sh->use();
@@ -302,12 +338,8 @@ void	Terrain::_staticUniform() {
 	Material material;
 	material.diffuse = {0.5f, 0.5f, 0.5f};
 	material.shininess = 32.0f;
-	// diffuse
-	_sh->setBool("material.diffuse.isTexture", false);
-	_sh->setVec3("material.diffuse.color", material.diffuse);
 	// specular
-	_sh->setBool("material.specular.isTexture", false);
-	_sh->setVec3("material.specular.color", material.specular);
+	_sh->setVec3("material.specular", material.specular);
 	// shininess
 	_sh->setFloat("material.shininess", material.shininess);
 

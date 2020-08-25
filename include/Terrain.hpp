@@ -18,7 +18,7 @@
 struct	TerrainVert {
 	glm::vec3	pos;  /**< Vert position */
 	glm::vec3	norm;  /**< Vert normal */
-	glm::vec2	texCoords;  /**< Vert texture coordinate */
+	glm::vec3	color;  /**< Vert color */
 };
 
 /**
@@ -60,6 +60,7 @@ class Terrain {
 		void	_loadFile();
 		std::vector<HeightPoint>	_getNClosest(glm::uvec2 pos, uint8_t n);
 		glm::vec3	_calculateNormal(uint32_t x, uint32_t z);
+		void	_initColors();
 		void	_staticUniform();
 
 		static std::unique_ptr<Shader>	_sh;  /**< Shader */
