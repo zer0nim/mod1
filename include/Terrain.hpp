@@ -1,7 +1,8 @@
 #ifndef TERRAIN_HPP_
 #define TERRAIN_HPP_
 
-#define NB_CLOSEST_POINTS 6
+#define NB_CLOSEST_POINTS 16
+#define BOX_B_STEP 8
 #define DISPLAY_RES 0.5
 #define TERRAIN_H(u, v) (_vertices[(v) * BOX_MAX_SIZE.x + (u)].pos.y)
 #define TESR_H(u, v) (_vertices[(v) * BOX_MAX_SIZE.x + (u)].pos)
@@ -53,8 +54,8 @@ class Terrain {
 		 * @brief Info about a heightmap point
 		 */
 		struct HeightPoint {
-			uint16_t	distance;
-			uint16_t	height;
+			int16_t distance;
+			int16_t	height;
 		};
 
 		void	_loadFile();
@@ -67,7 +68,7 @@ class Terrain {
 		Gui				&_gui;
 		std::string		_mapPath;
 		SettingsJson	*_map;
-		std::unordered_set<glm::uvec3>	_mapPoints;
+		std::unordered_set<glm::vec3>	_mapPoints;
 
 		std::vector<TerrainVert>	_vertices;
 		std::vector<uint32_t>	_indices;

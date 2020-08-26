@@ -57,9 +57,9 @@ void	Terrain::_loadFile() {
 	_map = new SettingsJson();
 
 	SettingsJson * coord3d = new SettingsJson();
-	coord3d->add<uint64_t>("x").setMin(0).setMax(BOX_MAX_SIZE.x);
-	coord3d->add<uint64_t>("y").setMin(0).setMax(BOX_MAX_SIZE.y);
-	coord3d->add<uint64_t>("z").setMin(0).setMax(BOX_MAX_SIZE.z);
+	coord3d->add<int64_t>("x").setMin(1).setMax(BOX_MAX_SIZE.x - 1);
+	coord3d->add<int64_t>("y").setMin(-BOX_GROUND_HEIGHT).setMax(BOX_MAX_SIZE.y - BOX_GROUND_HEIGHT);
+	coord3d->add<int64_t>("z").setMin(1).setMax(BOX_MAX_SIZE.z - 1);
 
 	_map->addList<SettingsJson>("map", coord3d);
 
@@ -88,13 +88,20 @@ void	Terrain::_loadFile() {
 				std::to_string(MAX_POINTS_NB)).c_str());
 		}
 
-		auto eRes = _mapPoints.emplace(p->u("x"), p->u("y"), p->u("z"));
+		auto eRes = _mapPoints.emplace(p->i("x"), p->i("y"), p->i("z"));
 		if (!std::get<1>(eRes))
 			logWarn("duplicate points in \"" << _mapPath << "\", skipped");
 	}
 
-	if (_mapPoints.size() == 0)
-		throw TerrainException(std::string("Map \"" + _mapPath + "\", you need to add at least one point").c_str());
+	// fill map border with 0 altitude
+	for (uint16_t x = 0; x < BOX_MAX_SIZE.x; x += BOX_B_STEP) {
+		_mapPoints.emplace(x, 0, 0);
+		_mapPoints.emplace(x, 0, BOX_MAX_SIZE.z - 1);
+	}
+	for (uint16_t z = 0; z < BOX_MAX_SIZE.z; z += BOX_B_STEP) {
+		_mapPoints.emplace(0, 0, z);
+		_mapPoints.emplace(BOX_MAX_SIZE.x - 1, 0, z);
+	}
 }
 
 bool	Terrain::draw(bool wireframe) {
@@ -125,7 +132,7 @@ float	Terrain::calculateHeight(glm::uvec2 pos) {
 	}
 
 	// we already know pos height
-	for (const glm::uvec3 & p: _mapPoints) {
+	for (const glm::vec3 & p: _mapPoints) {
 		if (glm::uvec2(p.x, p.z) == pos)
 			return p.y;
 	}
@@ -136,9 +143,10 @@ float	Terrain::calculateHeight(glm::uvec2 pos) {
 	// inverse distance weighting
 	float top = 0;
 	float bottom = 0;
-	for ( HeightPoint heightP : closPoints) {
+	for (HeightPoint heightP : closPoints) {
 		float distPow = heightP.distance;  // power of 1
-		distPow *= distPow;  // power of 2, comment if you want power of 1
+		distPow *= distPow;  // power of 2
+		distPow *= distPow;  // power of 3
 
 		top += heightP.height / distPow;
 		bottom += 1.0 / distPow;
@@ -159,7 +167,7 @@ std::vector<Terrain::HeightPoint>	Terrain::_getNClosest(glm::uvec2 pos, uint8_t 
 	std::vector<HeightPoint>	res(_mapPoints.size() < n ? _mapPoints.size() : n);
 
 	// calculate distance for each points
-	for (const glm::uvec3 & p: _mapPoints) {
+	for (const glm::vec3 & p: _mapPoints) {
 		HeightPoint heightP;
 		heightP.distance = glm::distance(glm::vec2(pos), glm::vec2(p.x, p.z));
 		heightP.height = p.y;
@@ -212,7 +220,11 @@ bool	Terrain::initMesh() {
 	for (uint16_t z = 0; z < BOX_MAX_SIZE.z; ++z) {
 		for (uint16_t x = 0; x < BOX_MAX_SIZE.x; ++x) {
 			TerrainVert	vert;
-			vert.pos = {x, calculateHeight({x, z}), z};
+			// force border to have null altitude
+			if (x == 0 || x == BOX_MAX_SIZE.x - 1 || z == 0 || z == BOX_MAX_SIZE.z - 1)
+				vert.pos = {x, 0, z};
+			else
+				vert.pos = {x, calculateHeight({x, z}), z};
 			_vertices.push_back(vert);
 		}
 	}
