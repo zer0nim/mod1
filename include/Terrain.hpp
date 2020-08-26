@@ -1,7 +1,7 @@
 #ifndef TERRAIN_HPP_
 #define TERRAIN_HPP_
 
-#define NB_CLOSEST_POINTS 8
+#define NB_CLOSEST_POINTS 6
 #define DISPLAY_RES 0.5
 #define TERRAIN_H(u, v) (_vertices[(v) * BOX_MAX_SIZE.x + (u)].pos.y)
 #define TESR_H(u, v) (_vertices[(v) * BOX_MAX_SIZE.x + (u)].pos)
@@ -35,7 +35,7 @@ class Terrain {
 		Terrain &operator=(Terrain const &rhs);
 
 		bool		draw(bool wireframe = false);
-		uint32_t	calculateHeight(glm::uvec2 pos);
+		float		calculateHeight(glm::uvec2 pos);
 		bool		initMesh();
 
 		// -- exceptions -------------------------------------------------------

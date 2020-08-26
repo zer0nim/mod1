@@ -117,7 +117,7 @@ bool	Terrain::draw(bool wireframe) {
 	return true;
 }
 
-uint32_t	Terrain::calculateHeight(glm::uvec2 pos) {
+float	Terrain::calculateHeight(glm::uvec2 pos) {
 	// is pos outside the terrain limit ?
 	if (pos.x > BOX_MAX_SIZE.x || pos.y > BOX_MAX_SIZE.z) {
 		logErr(std::string("[calculateHeight] pos " + glm::to_string(pos) +
@@ -141,7 +141,7 @@ uint32_t	Terrain::calculateHeight(glm::uvec2 pos) {
 		distPow *= distPow;  // power of 2, comment if you want power of 1
 
 		top += heightP.height / distPow;
-		bottom += 1 / distPow;
+		bottom += 1.0 / distPow;
 	}
 
 	return top / bottom;
@@ -291,9 +291,9 @@ bool	Terrain::initMesh() {
 
 void	Terrain::_initColors() {
 	std::array<glm::vec3, 3>	colors = {
-		glm::vec3(0.92f, 0.85f, 0.69f),  // rgb(235, 217, 177)
-		glm::vec3(0.61f, 0.76f, 0.2f),  // rgb(156, 195, 53)
-		glm::vec3(0.54f, 0.5f, 0.56f)  // rgb(136, 130, 144)
+		glm::vec3(0.92f, 0.85f, 0.69f),  // #EBD9B1
+		glm::vec3(0.61f, 0.76f, 0.2f),  // #9CC335
+		glm::vec3(0.54f, 0.5f, 0.56f)  // #8A808F
 	};
 
 	// calc min/max height
@@ -306,6 +306,7 @@ void	Terrain::_initColors() {
 			maxH = vert.pos.y;
 	}
 
+	// apply color based on the height ratio and the colors gradient array
 	float diffH = maxH - minH;
 	float step = 1.0 / (colors.size() - 1);
 	for (TerrainVert & vert : _vertices) {
@@ -313,7 +314,12 @@ void	Terrain::_initColors() {
 
 		for (uint8_t i = 0; i < colors.size() - 1; ++i) {
 			if (ratio <= step * (i + 1)) {
-				ratio /= step * (i + 1);
+				// modify ratio to be between 0 -> 1
+				float minR = step * i;
+				float maxR = step * (i + 1);
+				float diffR = maxR - minR;
+				ratio = (ratio - minR) / diffR;
+
 				vert.color = glm::lerp(colors[i], colors[i+1], ratio);
 				break;
 			}
