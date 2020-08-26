@@ -8,6 +8,7 @@ Scene::Scene(std::vector<Terrain *> & terrains)
   _dtTime(0.0f),
   _fps(60),
   _wireframeMode(false) {
+	_terrainId = 0;
 }
 
 Scene::~Scene() {
@@ -69,14 +70,22 @@ bool	Scene::_update() {
 	Inputs::update();
 	_gui.update();
 	_gui.cam->update(_dtTime);
+
 	if (Inputs::getKeyByScancodeDown(SDL_SCANCODE_1))
 		_wireframeMode = !_wireframeMode;
+
+	if (Inputs::getKeyDown(InputType::ACTION)) {
+		++_terrainId;
+		if (_terrainId >= _terrains.size())
+			_terrainId = 0;
+	}
+
 	return true;
 }
 
 bool	Scene::_draw() {
-	for (Terrain * & terrain : _terrains) {
-		if (!terrain->draw(_wireframeMode))
+	if (_terrainId < _terrains.size() &&
+		!_terrains[_terrainId]->draw(_wireframeMode)) {
 			return false;
 	}
 
