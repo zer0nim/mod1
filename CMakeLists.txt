@@ -25,25 +25,17 @@ endif()
 find_package(Git)
 
 if (GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
-	message(STATUS "Updating git submodules...")
-	set(SUBMODULES lib/glad;lib/stb;lib/sdl;lib/freetype;lib/assimp;)
-	set(REPOSITORIES https://github.com/Dav1dde/glad.git;https://github.com/nothings/stb.git;https://github.com/SDL-mirror/SDL.git;git://git.sv.nongnu.org/freetype/freetype2.git;https://github.com/assimp/assimp.git)
-
-	foreach(UPD_SUB IN LISTS SUBMODULES)
-		message(STATUS "Updating ${UPD_SUB}...")
-		execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive --remote -- ${UPD_SUB} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE GIT_SUBMOD_RESULT)
-
-		if (NOT GIT_SUBMOD_RESULT EQUAL "0")
-			list(FIND SUBMODULES ${UPD_SUB} SUB_INDEX)
-			list(GET REPOSITORIES ${SUB_INDEX} SUB_URL)
-
-			execute_process(COMMAND ${GIT_EXECUTABLE} submodule add ${SUB_URL} ${UPD_SUB} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-			execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive --remote -- ${UPD_SUB} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE GIT_SUBMOD_RESULT)
-			if (NOT GIT_SUBMOD_RESULT EQUAL "0")
-				message(WARNING "Unable to update submodule ${UPD_SUB}")
-			endif()
-		endif()
-	endforeach()
+	# Update submodules as needed
+    option(GIT_SUBMODULE "Check submodules during build" ON)
+    if (GIT_SUBMODULE)
+        message(STATUS "Submodule update")
+        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
+        if (NOT GIT_SUBMOD_RESULT EQUAL "0")
+            message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+        endif()
+    endif()
 else()
 	message(WARNING "Unable to update git submodules, please update them manually.")
 endif()
