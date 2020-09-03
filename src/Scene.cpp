@@ -80,12 +80,15 @@ bool	Scene::_update() {
 			_terrainId = 0;
 	}
 
+	if (!_terrains[_terrainId]->update(_dtTime)) {
+		return false;
+	}
+
 	return true;
 }
 
 bool	Scene::_draw() {
-	if (_terrainId < _terrains.size() &&
-		!_terrains[_terrainId]->draw(_wireframeMode)) {
+	if (!_terrains[_terrainId]->draw(_wireframeMode)) {
 			return false;
 	}
 
@@ -95,7 +98,7 @@ bool	Scene::_draw() {
 	return true;
 }
 
-// -- getters ----------------------------------------------------------
+// -- getters ------------------------------------------------------------------
 Gui &	Scene::getGui() { return _gui; }
 float	Scene::getDtTime() const { return _dtTime; }
 

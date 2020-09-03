@@ -3,7 +3,6 @@
 
 #define NB_CLOSEST_POINTS 16
 #define BOX_B_STEP 8
-#define DISPLAY_RES 0.5
 #define TERRAIN_H(u, v) (_vertices[(v) * BOX_MAX_SIZE.x + (u)].pos.y)
 #define TESR_H(u, v) (_vertices[(v) * BOX_MAX_SIZE.x + (u)].pos)
 
@@ -15,6 +14,8 @@
 #include "Shader.hpp"
 #include "Gui.hpp"
 #include "Material.hpp"
+
+class Water;
 
 struct	TerrainVert {
 	glm::vec3	pos;  /**< Vert position */
@@ -35,9 +36,10 @@ class Terrain {
 		Terrain(Terrain const &src);
 		Terrain &operator=(Terrain const &rhs);
 
-		bool		draw(bool wireframe = false);
-		float		calculateHeight(glm::uvec2 pos);
-		bool		initMesh();
+		bool	init();
+		bool	update(float dtTime);
+		bool	draw(bool wireframe = false);
+		float	getHeight(uint32_t u, uint32_t v) const;
 
 		// -- exceptions -------------------------------------------------------
 		/**
@@ -59,7 +61,9 @@ class Terrain {
 		};
 
 		void	_loadFile();
+		bool	_initMesh();
 		std::vector<HeightPoint>	_getNClosest(glm::uvec2 pos, uint8_t n);
+		float	_calculateHeight(glm::uvec2 pos);
 		glm::vec3	_calculateNormal(uint32_t x, uint32_t z);
 		void	_initColors();
 		void	_staticUniform();
@@ -75,6 +79,8 @@ class Terrain {
 		uint32_t	_vao;
 		uint32_t	_vbo;
 		uint32_t	_ebo;
+
+		Water	*_water;
 };
 
 #endif  // TERRAIN_HPP_

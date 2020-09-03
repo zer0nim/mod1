@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include "Terrain.hpp"
+#include "Water.hpp"
 
 // -- Constructors -------------------------------------------------------------
 
@@ -19,11 +20,11 @@ Terrain::Terrain(std::string const mapPath, Gui & gui)
 	}
 
 	_loadFile();
+
+	_water = new Water(*this);
 }
 
 Terrain::~Terrain() {
-	delete _map;
-
 	// free vao / vbo
 	_sh->use();
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -33,6 +34,8 @@ Terrain::~Terrain() {
 	glDeleteBuffers(1, &_ebo);
 	glDeleteVertexArrays(1, &_vao);
 	_sh->unuse();
+
+	delete _water;
 }
 
 Terrain::Terrain(Terrain const &src)
@@ -93,6 +96,8 @@ void	Terrain::_loadFile() {
 			logWarn("duplicate points in \"" << _mapPath << "\", skipped");
 	}
 
+	delete _map;
+
 	// fill map border with 0 altitude
 	for (uint16_t x = 0; x < BOX_MAX_SIZE.x; x += BOX_B_STEP) {
 		_mapPoints.emplace(x, 0, 0);
@@ -121,13 +126,15 @@ bool	Terrain::draw(bool wireframe) {
 
 	_sh->unuse();
 
+	_water->draw();
+
 	return true;
 }
 
-float	Terrain::calculateHeight(glm::uvec2 pos) {
+float	Terrain::_calculateHeight(glm::uvec2 pos) {
 	// is pos outside the terrain limit ?
 	if (pos.x > BOX_MAX_SIZE.x || pos.y > BOX_MAX_SIZE.z) {
-		logErr(std::string("[calculateHeight] pos " + glm::to_string(pos) +
+		logErr(std::string("[_calculateHeight] pos " + glm::to_string(pos) +
 			" is outside the terrain limit " + glm::to_string(BOX_MAX_SIZE)).c_str());
 	}
 
@@ -215,7 +222,14 @@ glm::vec3	Terrain::_calculateNormal(uint32_t x, uint32_t z) {
 	return glm::normalize(norm);
 }
 
-bool	Terrain::initMesh() {
+bool	Terrain::init() {
+	if (!_initMesh())
+		return false;
+	_water->init();
+	return true;
+}
+
+bool	Terrain::_initMesh() {
 	// fill vertices
 	for (uint16_t z = 0; z < BOX_MAX_SIZE.z; ++z) {
 		for (uint16_t x = 0; x < BOX_MAX_SIZE.x; ++x) {
@@ -224,7 +238,7 @@ bool	Terrain::initMesh() {
 			if (x == 0 || x == BOX_MAX_SIZE.x - 1 || z == 0 || z == BOX_MAX_SIZE.z - 1)
 				vert.pos = {x, 0, z};
 			else
-				vert.pos = {x, calculateHeight({x, z}), z};
+				vert.pos = {x, _calculateHeight({x, z}), z};
 			_vertices.push_back(vert);
 		}
 	}
@@ -235,7 +249,6 @@ bool	Terrain::initMesh() {
 	// calc vertices normals
 	for (TerrainVert & vert : _vertices) {
 		vert.norm = _calculateNormal(vert.pos.x, vert.pos.z);
-		vert.norm *= DISPLAY_RES;
 	}
 
 	// fill indices
@@ -362,6 +375,15 @@ void	Terrain::_staticUniform() {
 	_sh->setFloat("material.shininess", material.shininess);
 
 	_sh->unuse();
+}
+
+bool	Terrain::update(float dtTime) {
+	return _water->update(dtTime);
+}
+
+// -- getters ------------------------------------------------------------------
+float	Terrain::getHeight(uint32_t u, uint32_t v) const {
+	return TERRAIN_H(u, v);
 }
 
 // -- exceptions ---------------------------------------------------------------

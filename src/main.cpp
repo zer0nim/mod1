@@ -33,9 +33,8 @@ bool	init(int ac, char const **av, Scene & scene, std::vector<Terrain *> & terra
 }
 
 bool	simulation(std::vector<Terrain *> & terrains, Scene &scene) {
-	// test calculateHeight function
 	for (Terrain * & terrain : terrains) {
-		if (!terrain->initMesh())
+		if (!terrain->init())
 			return false;
 	}
 
