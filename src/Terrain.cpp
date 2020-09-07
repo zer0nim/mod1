@@ -21,7 +21,7 @@ Terrain::Terrain(std::string const mapPath, Gui & gui)
 
 	_loadFile();
 
-	_water = new Water(*this);
+	_water = new Water(*this, _gui);
 }
 
 Terrain::~Terrain() {
@@ -126,7 +126,7 @@ bool	Terrain::draw(bool wireframe) {
 
 	_sh->unuse();
 
-	_water->draw();
+	_water->draw(wireframe);
 
 	return true;
 }
@@ -191,11 +191,11 @@ std::vector<Terrain::HeightPoint>	Terrain::_getNClosest(glm::uvec2 pos, uint8_t 
 glm::vec3	Terrain::_calculateNormal(uint32_t x, uint32_t z) {
 	float hL, hR, hB, hT;
 
-	x = x == 0 ? 1 : x;
-	z = z == 0 ? 1 : z;
-
 	// hL
-	hL = TERRAIN_H(x - 1, z);
+	if (x != 0)
+		hL = TERRAIN_H(x - 1, z);
+	else
+		hL = TERRAIN_H(x, z);
 	// hR
 	if (x < BOX_MAX_SIZE.x - 1)
 		hR = TERRAIN_H(x + 1, z);
@@ -207,7 +207,10 @@ glm::vec3	Terrain::_calculateNormal(uint32_t x, uint32_t z) {
 	else
 		hT = TERRAIN_H(x, z);
 	// hB
-	hB = TERRAIN_H(x, z - 1);
+	if (z != 0)
+		hB = TERRAIN_H(x, z - 1);
+	else
+		hB = TERRAIN_H(x, z);
 
 	float sx = hR - hL;
 	if (x == 0 || x == BOX_MAX_SIZE.x - 1)
@@ -225,7 +228,8 @@ glm::vec3	Terrain::_calculateNormal(uint32_t x, uint32_t z) {
 bool	Terrain::init() {
 	if (!_initMesh())
 		return false;
-	_water->init();
+	if (!_water->init())
+		return false;
 	return true;
 }
 
@@ -234,11 +238,14 @@ bool	Terrain::_initMesh() {
 	for (uint16_t z = 0; z < BOX_MAX_SIZE.z; ++z) {
 		for (uint16_t x = 0; x < BOX_MAX_SIZE.x; ++x) {
 			TerrainVert	vert;
+			float pX = x / (BOX_MAX_SIZE.x - 1) * BOX_MAX_SIZE.x;
+			float pZ = z / (BOX_MAX_SIZE.z - 1) * BOX_MAX_SIZE.z;
+
 			// force border to have null altitude
 			if (x == 0 || x == BOX_MAX_SIZE.x - 1 || z == 0 || z == BOX_MAX_SIZE.z - 1)
-				vert.pos = {x, 0, z};
+				vert.pos = {pX, 0, pZ};
 			else
-				vert.pos = {x, _calculateHeight({x, z}), z};
+				vert.pos = {pX, _calculateHeight({x, z}), pZ};
 			_vertices.push_back(vert);
 		}
 	}
@@ -248,7 +255,9 @@ bool	Terrain::_initMesh() {
 
 	// calc vertices normals
 	for (TerrainVert & vert : _vertices) {
-		vert.norm = _calculateNormal(vert.pos.x, vert.pos.z);
+		uint16_t x = vert.pos.x / BOX_MAX_SIZE.x * (BOX_MAX_SIZE.x - 1);
+		uint16_t z = vert.pos.z / BOX_MAX_SIZE.z * (BOX_MAX_SIZE.z - 1);
+		vert.norm = _calculateNormal(x, z);
 	}
 
 	// fill indices
@@ -300,7 +309,7 @@ bool	Terrain::_initMesh() {
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TerrainVert),
 		reinterpret_cast<void *>(offsetof(TerrainVert, norm)));
-	// vertex texture coords
+	// vertex colors
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(TerrainVert),
 		reinterpret_cast<void *>(offsetof(TerrainVert, color)));

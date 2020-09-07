@@ -4,7 +4,6 @@
 #define NB_CLOSEST_POINTS 16
 #define BOX_B_STEP 8
 #define TERRAIN_H(u, v) (_vertices[(v) * BOX_MAX_SIZE.x + (u)].pos.y)
-#define TESR_H(u, v) (_vertices[(v) * BOX_MAX_SIZE.x + (u)].pos)
 
 #include <string>
 #include <unordered_set>
