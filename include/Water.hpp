@@ -2,8 +2,9 @@
 #define WATER_HPP_
 
 // gravity, m/s
-#define WATER_GRID_RES glm::vec2(63, 63)
+#define WATER_GRID_RES glm::vec2(BOX_MAX_SIZE.x - 1, BOX_MAX_SIZE.z - 1)
 #define WATER_H(u, v) (_vertices[(v) * (WATER_GRID_RES.x + 1) + (u)].pos.y)
+#define NO_WATER_DIST 7.0
 
 #include <vector>
 

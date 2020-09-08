@@ -64,7 +64,7 @@ bool	Water::init() {
 
 			// init left waters column at 0 to test
 			if (u == 0)
-				_waterCols[v][u].depth = 20.0;
+				_waterCols[v][u].depth = 30.0;
 		}
 	}
 
@@ -374,46 +374,61 @@ bool	Water::_updateMesh() {
 float	Water::_calculateHeight(uint32_t x, uint32_t z) {
 	float hL, hR, hB, hT;
 
+	bool noWater = true;
 	uint32_t zHoriz = z < WATER_GRID_RES.y ? z : z - 1;
 	// hL
 	if (x != 0) {
 		hL = _waterCols[zHoriz][x - 1].depth;
+		noWater = noWater && (hL == 0);
 		hL += _waterCols[zHoriz][x - 1].terrainH;
 	}
 	else {
 		hL = _waterCols[zHoriz][x].depth;
+		noWater = noWater && (hL == 0);
 		hL += _waterCols[zHoriz][x].terrainH;
 	}
 	// hR
 	if (x < WATER_GRID_RES.x) {
 		hR = _waterCols[zHoriz][x].depth;
+		noWater = noWater && (hR == 0);
 		hR += _waterCols[zHoriz][x].terrainH;
 	}
 	else {
 		hR = _waterCols[zHoriz][x - 1].depth;
+		noWater = noWater && (hR == 0);
 		hR += _waterCols[zHoriz][x - 1].terrainH;
 	}
 	uint32_t xVert = x < WATER_GRID_RES.x ? x : x - 1;
 	// hT
 	if (z != 0) {
 		hB = _waterCols[z - 1][xVert].depth;
+		noWater = noWater && (hB == 0);
 		hB += _waterCols[z - 1][xVert].terrainH;
 	}
 	else {
 		hB = _waterCols[z][xVert].depth;
+		noWater = noWater && (hB == 0);
 		hB += _waterCols[z][xVert].terrainH;
 	}
 	// hB
 	if (z < WATER_GRID_RES.y) {
 		hT = _waterCols[z][xVert].depth;
+		noWater = noWater && (hT == 0);
 		hT += _waterCols[z][xVert].terrainH;
 	}
 	else {
 		hT = _waterCols[z - 1][xVert].depth;
+		noWater = noWater && (hT == 0);
 		hT += _waterCols[z - 1][xVert].terrainH;
 	}
 
-	return (hL + hR + hB + hT) / 4.0;
+	float terrainH = (hL + hR + hB + hT) / 4.0;
+
+	// if no water, lower h to avoid water mesh overlaping with terrain
+	if (noWater)
+		terrainH -= NO_WATER_DIST;
+
+	return terrainH;
 }
 
 glm::vec3	Water::_calculateNormal(uint32_t x, uint32_t z) {
