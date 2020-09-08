@@ -283,7 +283,9 @@ bool	Water::_initMesh() {
 	for (uint16_t z = 0; z < WATER_GRID_RES.y + 1; ++z) {
 		for (uint16_t x = 0; x < WATER_GRID_RES.x + 1; ++x) {
 			WaterVert vert;
-			vert.pos = {_gridSpace.x * x, _calculateHeight(x, z), _gridSpace.y * z};
+			bool noWater = true;
+			vert.pos = {_gridSpace.x * x, _calculateHeight(x, z, noWater), _gridSpace.y * z};
+			vert.visible = noWater ? 0.0 : 1.0;
 			_vertices.push_back(vert);
 		}
 	}
@@ -344,6 +346,10 @@ bool	Water::_initMesh() {
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(WaterVert),
 		reinterpret_cast<void *>(offsetof(WaterVert, norm)));
+	// vertex visibility
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(WaterVert),
+		reinterpret_cast<void *>(offsetof(WaterVert, visible)));
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -355,11 +361,13 @@ bool	Water::_initMesh() {
 }
 
 bool	Water::_updateMesh() {
-	// update vertices pos/normals
+	// update vertices pos/normals/visibility
+	bool noWater = true;
 	for (WaterVert & vert : _vertices) {
 		uint16_t x = vert.pos.x / _gridSpace.x;
 		uint16_t z = vert.pos.z / _gridSpace.y;
-		vert.pos = glm::vec3(vert.pos.x, _calculateHeight(x, z), vert.pos.z);
+		vert.pos = glm::vec3(vert.pos.x, _calculateHeight(x, z, noWater), vert.pos.z);
+		vert.visible = noWater ? 0.0 : 1.0;
 		vert.norm = _calculateNormal(x, z);
 	}
 
@@ -371,10 +379,10 @@ bool	Water::_updateMesh() {
 	return true;
 }
 
-float	Water::_calculateHeight(uint32_t x, uint32_t z) {
+float	Water::_calculateHeight(uint32_t x, uint32_t z, bool & noWater) {
 	float hL, hR, hB, hT;
 
-	bool noWater = true;
+	noWater = true;
 	uint32_t zHoriz = z < WATER_GRID_RES.y ? z : z - 1;
 	// hL
 	if (x != 0) {
@@ -422,13 +430,7 @@ float	Water::_calculateHeight(uint32_t x, uint32_t z) {
 		hT += _waterCols[z - 1][xVert].terrainH;
 	}
 
-	float terrainH = (hL + hR + hB + hT) / 4.0;
-
-	// if no water, lower h to avoid water mesh overlaping with terrain
-	if (noWater)
-		terrainH -= NO_WATER_DIST;
-
-	return terrainH;
+	return (hL + hR + hB + hT) / 4.0;
 }
 
 glm::vec3	Water::_calculateNormal(uint32_t x, uint32_t z) {

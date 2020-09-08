@@ -88,13 +88,14 @@ bool	Scene::_update() {
 }
 
 bool	Scene::_draw() {
+	// draw skybox
+	glm::mat4	view = _gui.cam->getViewMatrix();
+	_gui.drawSkybox(view);
+
 	if (!_terrains[_terrainId]->draw(_wireframeMode)) {
 			return false;
 	}
 
-	// draw skybox
-	glm::mat4	view = _gui.cam->getViewMatrix();
-	_gui.drawSkybox(view);
 	return true;
 }
 

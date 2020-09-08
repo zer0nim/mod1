@@ -7,6 +7,7 @@ out vec4	fragColor;
 in VS_OUT {
 	vec3 FragPos;
 	vec3 Normal;
+	float Visible;
 } fs_in;
 
 struct	Material {
@@ -50,7 +51,9 @@ vec3 calcDirLight(DirLight light, vec3 norm, vec3 viewDir) {
 
 void main() {
 	// retrieve alpha
-	float alpha = wColor.a;
+	float alpha = wColor.a * fs_in.Visible;
+	if (alpha < 0.01)
+		discard;
 
 	// retrieve normal
 	vec3	norm = normalize(fs_in.Normal);

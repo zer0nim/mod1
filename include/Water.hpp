@@ -4,7 +4,6 @@
 // gravity, m/s
 #define WATER_GRID_RES glm::vec2(BOX_MAX_SIZE.x - 1, BOX_MAX_SIZE.z - 1)
 #define WATER_H(u, v) (_vertices[(v) * (WATER_GRID_RES.x + 1) + (u)].pos.y)
-#define NO_WATER_DIST 7.0
 
 #include <vector>
 
@@ -35,6 +34,7 @@ struct	WaterColum {
 struct	WaterVert {
 	glm::vec3	pos;  /**< Vert position */
 	glm::vec3	norm;  /**< Vert normal */
+	float		visible;  /**< Vert visibility between 0.0 and 1.0 */
 };
 
 class Water {
@@ -70,7 +70,7 @@ class Water {
 		void	_correctNegWaterDepth();
 		bool	_initMesh();
 		bool	_updateMesh();
-		float	_calculateHeight(uint32_t x, uint32_t z);
+		float	_calculateHeight(uint32_t x, uint32_t z, bool & noWater);
 		glm::vec3	_calculateNormal(uint32_t x, uint32_t z);
 		void	_staticUniform();
 };
