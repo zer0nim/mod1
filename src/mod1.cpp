@@ -188,6 +188,10 @@ bool	argParse(int nbArgs, char const ** args, std::vector<std::string> & mapsPat
 		}
 	}
 
+	// we need at least one map
+	if (mapsPath.size() == 0)
+		return usage();
+
 	return true;
 }
 

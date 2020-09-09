@@ -52,7 +52,8 @@ int main(int ac, char const **av) {
 
 	if (ret != EXIT_FAILURE) {
 		// launch simulation
-		ret = simulation(terrains, scene);
+		if (!simulation(terrains, scene))
+			ret = EXIT_FAILURE;
 
 		// save settings before exiting
 		if (ret != EXIT_FAILURE)

@@ -63,6 +63,7 @@ bool	Scene::run() {
 				usleep((maxFrameDuration - frameDuration) * 1000);
 		}
 	}
+
 	return true;
 }
 

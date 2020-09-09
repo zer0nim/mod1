@@ -20,8 +20,6 @@ Gui::Gui()
  * @brief Destroy the Gui:: Gui object
  */
 Gui::~Gui() {
-	logDebug("exit SDL");
-
 	// free vao / vbo
 	if (cubeShader != nullptr) {
 		cubeShader->use();
