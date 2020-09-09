@@ -16,6 +16,8 @@
 #define DEFAULT_CONFIRM		SDL_SCANCODE_RETURN
 #define DEFAULT_CANCEL		SDL_SCANCODE_ESCAPE
 #define DEFAULT_MENU		SDL_SCANCODE_TAB
+#define DEFAULT_INCREMENT_1	SDL_SCANCODE_EQUALS
+#define DEFAULT_DECREMENT_1	SDL_SCANCODE_MINUS
 
 namespace InputType {
 	/**
@@ -27,6 +29,8 @@ namespace InputType {
 		CONFIRM,
 		CANCEL,
 		GOTO_MENU,
+		INCREMENT_1,
+		DECREMENT_1,
 		NB_INPUTS  // need to be the last element
 	};
 }  // namespace InputType

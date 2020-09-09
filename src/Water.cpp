@@ -50,7 +50,9 @@ Water::Water(Water const &src)
 }
 
 Water &Water::operator=(Water const &rhs) {
-	if (this != &rhs) {}
+	if (this != &rhs) {
+		logWarn("operator= called");
+	}
 	return *this;
 }
 
@@ -91,21 +93,11 @@ bool	Water::update(float dtTime) {
 
 void	Water::_updateFlow(uint32_t u, uint32_t v, float dtTime) {
 	/*
-		pipeCSA is the cross-sectional area of the pipe, what value do I need ? 🤔
-		We calculate pipeCSA = _d * ∆x, where _d is the upwind depth as in equation 4.5.
-		_d is the depth evaluated at the upwind direction:
-
-		// is u the flow ?
-		if ((u(i + 1/2, j) > 0) {
-			_d(i + 1/2, j) = d(i, j);
-		}
-		else {
-			_d(i + 1/2, j) = d(i + 1, j);
-		}
-
-		Artificially varying pipeCSA leads to an approximate method for modeling viscosity (larger values make the water more lively).
+		pipeCSA is the cross-sectional area of the pipe
+		Artificially varying pipeCSA leads to an approximate method for modeling viscosity
+		(larger values make the water more lively).
 	*/
-	float pipeCSA = 1.0;  // cross-sectional area of the pipe
+	float pipeCSA = _gridArea;
 
 	// column water total height
 	float totalH = _waterCols[v][u].terrainH + _waterCols[v][u].depth;
@@ -125,19 +117,20 @@ void	Water::_updateFlow(uint32_t u, uint32_t v, float dtTime) {
 		_waterCols[v][u].lFlow = 0.0;
 	}
 	else {
+		float hDiff = 0.0;
 		float freeWaterH = 0.0;
 		if (totalH > totalHLeft) {
 			float totalHDiff = totalH - totalHLeft;
 			freeWaterH = totalHDiff > _waterCols[v][u].depth ? _waterCols[v][u].depth : totalHDiff;
+			hDiff = -freeWaterH;
 		}
 		else {
 			float totalHDiff = totalHLeft - totalH;
 			freeWaterH = totalHDiff > _waterCols[v][u - 1].depth ? _waterCols[v][u - 1].depth : totalHDiff;
+			hDiff = freeWaterH;
 		}
-		pipeCSA = _gridSpace.x * freeWaterH;
+		// pipeCSA = _gridSpace.x * freeWaterH;
 
-		// ! maybe only count water diff above terrain ?
-		float hDiff = _waterCols[v][u - 1].depth - _waterCols[v][u].depth;
 		_waterCols[v][u].lFlow += pipeCSA * (_gravity / _pipeLen.x) * hDiff * dtTime;
 	}
 
@@ -156,19 +149,20 @@ void	Water::_updateFlow(uint32_t u, uint32_t v, float dtTime) {
 		_waterCols[v][u].tFlow = 0.0;
 	}
 	else {
+		float hDiff = 0.0;
 		float freeWaterH = 0.0;
 		if (totalH > totalHTop) {
 			float totalHDiff = totalH - totalHTop;
 			freeWaterH = totalHDiff > _waterCols[v][u].depth ? _waterCols[v][u].depth : totalHDiff;
+			hDiff = -freeWaterH;
 		}
 		else {
 			float totalHDiff = totalHTop - totalH;
 			freeWaterH = totalHDiff > _waterCols[v - 1][u].depth ? _waterCols[v - 1][u].depth : totalHDiff;
+			hDiff = freeWaterH;
 		}
-		pipeCSA = _gridSpace.y * freeWaterH;
+		// pipeCSA = _gridSpace.y * freeWaterH;
 
-		// ! maybe only count water diff above terrain ?
-		float hDiff = _waterCols[v - 1][u].depth - _waterCols[v][u].depth;
 		_waterCols[v][u].tFlow += pipeCSA * (_gravity / _pipeLen.y) * hDiff * dtTime;
 	}
 
