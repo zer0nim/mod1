@@ -53,7 +53,8 @@ class Gui {
 		void	enableCursor(bool enable = true);
 		void	drawCube(Block::Enum typeBlock, glm::vec3 pos = {0, 0, 0}, glm::vec3 scale = {1, 1, 1});
 		void	updateFullscreen();
-		void	udpateDimension();
+		void	updateDimension();
+		bool	getWindowsFlag(uint32_t flag);
 
 		GameInfo		gameInfo;  /**< GameInfo object */
 		TextureManager	*textureManager;  /**< TextureManager object */

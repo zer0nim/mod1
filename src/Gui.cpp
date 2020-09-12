@@ -236,7 +236,7 @@ bool	Gui::_initShaders() {
 
 	// -- camera ---------------------------------------------------------------
 	float ratio = static_cast<float>(gameInfo.windowSize.x) / gameInfo.windowSize.y;
-	cam = new Camera(ratio, {0.0f, 25.0f, 0.0f});
+	cam = new Camera(*this, ratio, {0.0f, 25.0f, 0.0f});
 
 	// -- set default uniforms -------------------------------------------------
 	// projection
@@ -399,11 +399,19 @@ void	Gui::updateFullscreen() {
 /**
  * Update the dimension of the window from its settings.
  */
-void	Gui::udpateDimension() {
+void	Gui::updateDimension() {
 	gameInfo.windowSize.x = s.j("graphics").i("width");
 	gameInfo.windowSize.y = s.j("graphics").i("height");
 	SDL_SetWindowSize(_win, gameInfo.windowSize.x, gameInfo.windowSize.y);
 	SDL_SetWindowPosition(_win, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+}
+
+/**
+ * get a sdl windows flag status
+ */
+bool	Gui::getWindowsFlag(uint32_t flag) {
+	uint32_t flags = SDL_GetWindowFlags(_win);
+	return flags & flag;
 }
 
 // -- draw ---------------------------------------------------------------------

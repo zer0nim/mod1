@@ -2,6 +2,7 @@
 #include "Camera.hpp"
 #include "Logging.hpp"
 #include "Inputs.hpp"
+#include "Gui.hpp"
 
 // -- Constructors -------------------------------------------------------------
 /**
@@ -13,7 +14,7 @@
  * @param yaw Yaw
  * @param pitch Pitch
  */
-Camera::Camera(float const ratio, CAMERA_VEC3 pos, CAMERA_VEC3 up, CAMERA_FLOAT yaw,
+Camera::Camera(Gui & gui, float const ratio, CAMERA_VEC3 pos, CAMERA_VEC3 up, CAMERA_FLOAT yaw,
 	CAMERA_FLOAT pitch)
 : pos(pos),
   front(CAMERA_VEC3(0.0f, 0.0f, -1.0f)),
@@ -23,6 +24,7 @@ Camera::Camera(float const ratio, CAMERA_VEC3 pos, CAMERA_VEC3 up, CAMERA_FLOAT 
   movementSpeed(MOVEMENT_SPEED),
   mouseSensitivity(MOUSE_SENSITIVITY),
   runFactor(RUN_FACTOR),
+  _gui(gui),
   _mode(CamMode::FPS),
   _ratio(ratio),
   _startPos(pos),
@@ -54,7 +56,8 @@ Camera::~Camera() {
  *
  * @param src The object to do the copy
  */
-Camera::Camera(Camera const &src) {
+Camera::Camera(Camera const &src)
+: _gui(src._gui) {
 	*this = src;
 	frustumCullingInit(_fovY, _ratio, _near, _far);
 }
@@ -213,32 +216,34 @@ void	Camera::_updateStatic(float dtTime) {
 	// nothing to do in static camera update
 }
 void	Camera::_updateFps(float dtTime) {
-	// mouse movement
-	processMouseMovement(Inputs::getMouseRel());
+	if (_gui.getWindowsFlag(SDL_WINDOW_INPUT_FOCUS)) {
+		// mouse movement
+		processMouseMovement(Inputs::getMouseRel());
 
-	bool isRun = false;
-	if (Inputs::getKeyByScancode(SDL_SCANCODE_LSHIFT)) {
-		isRun = true;
-	}
+		bool isRun = false;
+		if (Inputs::getKeyByScancode(SDL_SCANCODE_LSHIFT)) {
+			isRun = true;
+		}
 
-	// camera movement
-	if (Inputs::getKeyByScancode(SDL_SCANCODE_W)) {
-		processKeyboard(CamMovement::Forward, dtTime, isRun);
-	}
-	if (Inputs::getKeyByScancode(SDL_SCANCODE_D)) {
-		processKeyboard(CamMovement::Right, dtTime, isRun);
-	}
-	if (Inputs::getKeyByScancode(SDL_SCANCODE_S)) {
-		processKeyboard(CamMovement::Backward, dtTime, isRun);
-	}
-	if (Inputs::getKeyByScancode(SDL_SCANCODE_A)) {
-		processKeyboard(CamMovement::Left, dtTime, isRun);
-	}
-	if (Inputs::getKeyByScancode(SDL_SCANCODE_Q)) {
-		processKeyboard(CamMovement::Down, dtTime, isRun);
-	}
-	if (Inputs::getKeyByScancode(SDL_SCANCODE_E)) {
-		processKeyboard(CamMovement::Up, dtTime, isRun);
+		// camera movement
+		if (Inputs::getKeyByScancode(SDL_SCANCODE_W)) {
+			processKeyboard(CamMovement::Forward, dtTime, isRun);
+		}
+		if (Inputs::getKeyByScancode(SDL_SCANCODE_D)) {
+			processKeyboard(CamMovement::Right, dtTime, isRun);
+		}
+		if (Inputs::getKeyByScancode(SDL_SCANCODE_S)) {
+			processKeyboard(CamMovement::Backward, dtTime, isRun);
+		}
+		if (Inputs::getKeyByScancode(SDL_SCANCODE_A)) {
+			processKeyboard(CamMovement::Left, dtTime, isRun);
+		}
+		if (Inputs::getKeyByScancode(SDL_SCANCODE_Q)) {
+			processKeyboard(CamMovement::Down, dtTime, isRun);
+		}
+		if (Inputs::getKeyByScancode(SDL_SCANCODE_E)) {
+			processKeyboard(CamMovement::Up, dtTime, isRun);
+		}
 	}
 }
 void	Camera::_updateFollowPath(float dtTime) {

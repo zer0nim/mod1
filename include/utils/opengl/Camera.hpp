@@ -4,6 +4,8 @@
 #include <vector>
 #include "includesOpengl.hpp"
 
+class Gui;
+
 #define CONSTRAINT_Y		false  // if true, move forward didn't affect Y position
 #define MOVEMENT_SPEED		15.0f
 #define RUN_FACTOR			3.0f
@@ -92,7 +94,7 @@ struct FrustumCulling {
  */
 class Camera {
 	public:
-		Camera(float const ratio, CAMERA_VEC3 pos = CAMERA_VEC3(0.0f, 0.0f, 0.0f),
+		Camera(Gui & gui, float const ratio, CAMERA_VEC3 pos = CAMERA_VEC3(0.0f, 0.0f, 0.0f),
 			CAMERA_VEC3 up = CAMERA_VEC3(0.0, 1.0, 0.0), CAMERA_FLOAT yaw = -90.0f,
 			CAMERA_FLOAT pitch = 0.0f);
 		virtual ~Camera();
@@ -160,6 +162,7 @@ class Camera {
 		void	_updateFps(float dtTime);
 		void	_updateFollowPath(float dtTime);
 
+		Gui &			_gui;  /**< gui ref to access windows flags */
 		CamMode::Enum	_mode;  /**< Camera mode (STATIC, FPS, ...) */
 		float			_ratio;  /**< Camera ratio */
 		float			_fovY;  /**< Camera fov */
