@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "Water.hpp"
 
 // -- const --------------------------------------------------------------------
@@ -18,7 +20,10 @@ Water::Water(Terrain & terrain, Gui & gui)
   _terrain(terrain),
   _vao(0),
   _vbo(0),
-  _ebo(0) {
+  _ebo(0),
+  _vaoB(0),
+  _vboB(0),
+  _eboB(0) {
 	// init static shader if null
 	if (!_sh) {
 		_sh = std::unique_ptr<Shader>(
@@ -40,6 +45,9 @@ Water::~Water() {
 	glDeleteBuffers(1, &_vbo);
 	glDeleteBuffers(1, &_ebo);
 	glDeleteVertexArrays(1, &_vao);
+	glDeleteBuffers(1, &_vboB);
+	glDeleteBuffers(1, &_eboB);
+	glDeleteVertexArrays(1, &_vaoB);
 	_sh->unuse();
 }
 
@@ -72,6 +80,8 @@ bool	Water::init() {
 
 	if (!_initMesh())
 		return false;
+	if (!_initMeshBorder())
+		return false;
 	return true;
 }
 
@@ -94,7 +104,10 @@ bool	Water::update(float dtTime) {
 	}
 
 	// update the mesh accordingly
-	_updateMesh();
+	if (!_updateMesh())
+		return false;
+	if (!_updateMeshBorder())
+		return false;
 
 	return true;
 }
@@ -273,7 +286,15 @@ bool	Water::draw(bool wireframe) {
 	glBindVertexArray(_vao);
 	if (wireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	// draw water surface
+	_sh->setVec4("wColor", 0.098, 0.619, 0.901, 0.7);  // #199ee6
 	glDrawElements(GL_TRIANGLE_STRIP, _indices.size(), GL_UNSIGNED_INT, 0);
+	// draw water border
+	glBindVertexArray(_vaoB);
+	_sh->setVec4("wColor", 0.098, 0.619, 0.901, 0.8);  // #199ee6
+	glDrawElements(GL_TRIANGLE_STRIP, _indicesB.size(), GL_UNSIGNED_INT, 0);
+
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // reset polygon mode
 	glBindVertexArray(0);
 
@@ -296,8 +317,8 @@ bool	Water::_initMesh() {
 
 	// calc vertices normals
 	for (WaterVert & vert : _vertices) {
-		uint16_t x = vert.pos.x / _gridSpace.x;
-		uint16_t z = vert.pos.z / _gridSpace.y;
+		uint16_t x = std::round(vert.pos.x / _gridSpace.x);
+		uint16_t z = std::round(vert.pos.z / _gridSpace.y);
 		vert.norm = _calculateNormal(x, z);
 	}
 
@@ -368,8 +389,8 @@ bool	Water::_updateMesh() {
 	// update vertices pos/normals/visibility
 	bool noWater = true;
 	for (WaterVert & vert : _vertices) {
-		uint16_t x = vert.pos.x / _gridSpace.x;
-		uint16_t z = vert.pos.z / _gridSpace.y;
+		uint16_t x = std::round(vert.pos.x / _gridSpace.x);
+		uint16_t z = std::round(vert.pos.z / _gridSpace.y);
 		vert.pos = glm::vec3(vert.pos.x, _calculateHeight(x, z, noWater), vert.pos.z);
 		vert.visible = noWater ? 0.0 : 1.0;
 		vert.norm = _calculateNormal(x, z);
@@ -381,6 +402,121 @@ bool	Water::_updateMesh() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	return true;
+}
+
+bool	Water::_initMeshBorder() {
+	// fill vertices
+	float meshWidth = (WATER_GRID_RES.x + 1) * 2 + (WATER_GRID_RES.y + 1) * 2;
+	_verticesB = std::vector<WaterVert>(meshWidth * 2, WaterVert());
+	_updateBorderVertices();
+
+	// fill indices
+	// We create a triangle strip to draw all the borders in one call
+	uint32_t a, b;
+	_indicesB.push_back(0);
+	for (uint16_t x = 0; x < meshWidth; ++x) {
+		a = x;
+		b = a + meshWidth;
+		_indicesB.push_back(a);
+		_indicesB.push_back(b);
+	}
+
+	// create vao, vbo, ebo
+	glGenVertexArrays(1, &_vaoB);
+	glGenBuffers(1, &_vboB);
+	glGenBuffers(1, &_eboB);
+
+	// fill vao buffer
+	glBindVertexArray(_vaoB);
+	glBindBuffer(GL_ARRAY_BUFFER, _vboB);
+	glBufferData(GL_ARRAY_BUFFER, _verticesB.size() * sizeof(WaterVert),
+		&_verticesB[0], GL_STATIC_DRAW);
+
+	// set-up ebo
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _eboB);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indicesB.size() * sizeof(u_int32_t),
+		&_indicesB[0], GL_STATIC_DRAW);
+
+	// vertex positions
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(WaterVert),
+		reinterpret_cast<void *>(0));
+	// vertex normals
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(WaterVert),
+		reinterpret_cast<void *>(offsetof(WaterVert, norm)));
+	// vertex visibility
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(WaterVert),
+		reinterpret_cast<void *>(offsetof(WaterVert, visible)));
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	return true;
+}
+
+bool	Water::_updateMeshBorder() {
+	_updateBorderVertices();
+
+	// update vbo data
+	glBindBuffer(GL_ARRAY_BUFFER, _vboB);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, _verticesB.size() * sizeof(WaterVert), &_verticesB[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	return true;
+}
+
+void	Water::_updateBorderVertices() {
+	// update vertices pos/normals/visibility
+	float meshWidth = (WATER_GRID_RES.x + 1) * 2 + (WATER_GRID_RES.y + 1) * 2;
+	uint32_t i = 0;
+	WaterVert vert;
+	for (int32_t x = 0; x < WATER_GRID_RES.x + 1; ++x) {
+		bool noWater = true;
+		float depth = _calculateHeight(x, 0, noWater);
+		vert.pos = {x * _gridSpace.x, depth, 0};
+		vert.norm = {0, 0, -1};
+		vert.visible = noWater ? 0.0 : 1.0;
+		_verticesB[i] = vert;
+		vert.pos = {vert.pos.x, 0.0, vert.pos.z};
+		_verticesB[i + meshWidth] = vert;
+		++i;
+	}
+	for (int32_t z = 0; z < WATER_GRID_RES.y + 1; ++z) {
+		bool noWater = true;
+		float depth = _calculateHeight(WATER_GRID_RES.x, z, noWater);
+		vert.pos = {WATER_GRID_RES.x * _gridSpace.x, depth, z * _gridSpace.y};
+		vert.norm = {1, 0, 0};
+		vert.visible = noWater ? 0.0 : 1.0;
+		_verticesB[i] = vert;
+		vert.pos = {vert.pos.x, 0.0, vert.pos.z};
+		_verticesB[i + meshWidth] = vert;
+		++i;
+	}
+	for (int32_t x = WATER_GRID_RES.x; x >= 0; --x) {
+		bool noWater = true;
+		float depth = _calculateHeight(x, WATER_GRID_RES.y, noWater);
+		vert.pos = {x * _gridSpace.x, depth, WATER_GRID_RES.y * _gridSpace.y};
+		vert.norm = {0, 0, 1};
+		vert.visible = noWater ? 0.0 : 1.0;
+		_verticesB[i] = vert;
+		vert.pos = {vert.pos.x, 0.0, vert.pos.z};
+		_verticesB[i + meshWidth] = vert;
+		++i;
+	}
+	for (int32_t z = WATER_GRID_RES.y; z >= 0; --z) {
+		bool noWater = true;
+		float depth = _calculateHeight(0, z, noWater);
+		vert.pos = {0, depth, z * _gridSpace.y};
+		vert.norm = {-1, 0, 0};
+		vert.visible = noWater ? 0.0 : 1.0;
+		_verticesB[i] = vert;
+		vert.pos = {vert.pos.x, 0.0, vert.pos.z};
+		_verticesB[i + meshWidth] = vert;
+		++i;
+	}
 }
 
 float	Water::_calculateHeight(uint32_t x, uint32_t z, bool & noWater) {

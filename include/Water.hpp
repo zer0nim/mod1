@@ -65,11 +65,21 @@ class Water {
 		uint32_t	_vbo;
 		uint32_t	_ebo;
 
+		// border mesh
+		std::vector<WaterVert>	_verticesB;
+		std::vector<uint32_t>	_indicesB;
+		uint32_t	_vaoB;
+		uint32_t	_vboB;
+		uint32_t	_eboB;
+
 		void	_updateFlow(uint32_t u, uint32_t v, float dtTime);
 		void	_updateDepth(uint32_t u, uint32_t v, float dtTime);
 		void	_correctNegWaterDepth(float dtTime);
 		bool	_initMesh();
 		bool	_updateMesh();
+		bool	_initMeshBorder();
+		void	_updateBorderVertices();
+		bool	_updateMeshBorder();
 		float	_calculateHeight(uint32_t x, uint32_t z, bool & noWater);
 		glm::vec3	_calculateNormal(uint32_t x, uint32_t z);
 		void	_staticUniform();
