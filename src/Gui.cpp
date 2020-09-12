@@ -161,7 +161,7 @@ bool	Gui::_initOpengl() {
 
 	// create window
 	_win = SDL_CreateWindow(gameInfo.title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-		gameInfo.windowSize.x, gameInfo.windowSize.y, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+		gameInfo.windowSize.x, gameInfo.windowSize.y, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
 	if (_win == nullptr) {
 		logErr("while loading OpenGL: " << SDL_GetError());
 		return false;
