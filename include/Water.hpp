@@ -67,7 +67,7 @@ class Water {
 
 		void	_updateFlow(uint32_t u, uint32_t v, float dtTime);
 		void	_updateDepth(uint32_t u, uint32_t v, float dtTime);
-		void	_correctNegWaterDepth();
+		void	_correctNegWaterDepth(float dtTime);
 		bool	_initMesh();
 		bool	_updateMesh();
 		float	_calculateHeight(uint32_t x, uint32_t z, bool & noWater);

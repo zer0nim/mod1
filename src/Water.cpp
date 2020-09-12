@@ -80,10 +80,18 @@ bool	Water::update(float dtTime) {
 	for (uint32_t v = 0; v < WATER_GRID_RES.y; ++v) {
 		for (uint32_t u = 0; u < WATER_GRID_RES.x; ++u) {
 			_updateFlow(u, v, dtTime);
+		}
+	}
+
+	// scale flow to prevent negative water depth
+	_correctNegWaterDepth(dtTime);
+
+	// update all water columns
+	for (uint32_t v = 0; v < WATER_GRID_RES.y; ++v) {
+		for (uint32_t u = 0; u < WATER_GRID_RES.x; ++u) {
 			_updateDepth(u, v, dtTime);
 		}
 	}
-	_correctNegWaterDepth();
 
 	// update the mesh accordingly
 	_updateMesh();
@@ -184,70 +192,72 @@ void	Water::_updateDepth(uint32_t u, uint32_t v, float dtTime) {
 
 	// calculate the new depth
 	_waterCols[v][u].depth += (totalFlow / _gridArea) * dtTime;
+	// prevent the depth from going bellow 0
+	_waterCols[v][u].depth = std::max(0.0f, _waterCols[v][u].depth);
 }
 
-void	Water::_correctNegWaterDepth() {
-	// search for negativ depth and correct them
-	for (uint32_t v = 0; v < WATER_GRID_RES.y; ++v) {
-		for (uint32_t u = 0; u < WATER_GRID_RES.x; ++u) {
-			// depth should not be negative
-			if (_waterCols[v][u].depth < 0.0) {
-				float dDiff = -_waterCols[v][u].depth;
-				float totalNegFlow = 0.0;
+void	Water::_correctNegWaterDepth(float dtTime) {
+	bool asNegDepth = true;
+	for (uint16_t i = 0; asNegDepth && i < 5; ++i) {
+		asNegDepth = false;
+		// search for negativ depth and correct them
+		for (uint32_t v = 0; v < WATER_GRID_RES.y; ++v) {
+			for (uint32_t u = 0; u < WATER_GRID_RES.x; ++u) {
+				float lFlow = 0, tFlow = 0, rFlow = 0, bFlow = 0;
+				float totNegFlow = 0;  // store the total negative flow
+				float totPosFlow = 0;  // store the total negative flow
 
-				// calculate the total negative flow, to calculate ratio later
-				std::vector<FlowDir::Enum>	negativeFlows;
-				if (_waterCols[v][u].lFlow < 0.0) {
-					negativeFlows.push_back(FlowDir::LEFT);
-					totalNegFlow += -_waterCols[v][u].lFlow;
+				// left flow
+				lFlow = _waterCols[v][u].lFlow;
+				if (lFlow < 0)
+					totNegFlow += lFlow;
+				else
+					totPosFlow += lFlow;
+				// top flow
+				tFlow = _waterCols[v][u].tFlow;
+				if (tFlow < 0)
+					totNegFlow += tFlow;
+				else
+					totPosFlow += tFlow;
+				// right flow
+				if (u < WATER_GRID_RES.x - 1) {
+					rFlow = -_waterCols[v][u + 1].lFlow;
+					if (rFlow < 0)
+						totNegFlow += rFlow;
+					else
+						totPosFlow += rFlow;
 				}
-				if (_waterCols[v][u].tFlow < 0.0) {
-					negativeFlows.push_back(FlowDir::TOP);
-					totalNegFlow += -_waterCols[v][u].tFlow;
-				}
-				if (u < WATER_GRID_RES.x - 1 && _waterCols[v][u + 1].lFlow > 0.0) {
-					negativeFlows.push_back(FlowDir::RIGHT);
-					totalNegFlow += _waterCols[v][u + 1].lFlow;
-				}
-				if (v < WATER_GRID_RES.y - 1 && _waterCols[v + 1][u].tFlow > 0.0) {
-					negativeFlows.push_back(FlowDir::BOTTOM);
-					totalNegFlow += _waterCols[v + 1][u].tFlow;
-				}
-
-				// update flow and neighbor height proportionally
-				float correcRatio = 0.0;
-				float correcFlow = 0.0;
-				for (FlowDir::Enum flowDir : negativeFlows) {
-					switch (flowDir) {
-					case FlowDir::LEFT:
-						correcRatio = -_waterCols[v][u].lFlow / totalNegFlow;
-						correcFlow = dDiff * correcRatio;
-						_waterCols[v][u].lFlow += correcFlow;
-						_waterCols[v][u - 1].depth -= (correcFlow / _gridArea);
-						break;
-					case FlowDir::TOP:
-						correcRatio = -_waterCols[v][u].tFlow / totalNegFlow;
-						correcFlow = dDiff * correcRatio;
-						_waterCols[v][u].tFlow += correcFlow;
-						_waterCols[v - 1][u].depth -= (correcFlow / _gridArea);
-						break;
-					case FlowDir::RIGHT:
-						correcRatio = _waterCols[v][u + 1].lFlow / totalNegFlow;
-						correcFlow = dDiff * correcRatio;
-						_waterCols[v][u + 1].lFlow -= correcFlow;
-						_waterCols[v][u + 1].depth -= (correcFlow / _gridArea);
-						break;
-					case FlowDir::BOTTOM:
-						correcRatio = _waterCols[v + 1][u].tFlow / totalNegFlow;
-						correcFlow = dDiff * correcRatio;
-						_waterCols[v + 1][u].tFlow -= correcFlow;
-						_waterCols[v + 1][u].depth -= (correcFlow / _gridArea);
-						break;
-					}
+				// bottom flow
+				if (v < WATER_GRID_RES.y - 1) {
+					bFlow = -_waterCols[v + 1][u].tFlow;
+					if (bFlow < 0)
+						totNegFlow += bFlow;
+					else
+						totPosFlow += bFlow;
 				}
 
-				// set negative water depth to 0
-				_waterCols[v][u].depth = 0.0;
+				float totalFlow = lFlow + tFlow + rFlow + bFlow;
+				float depthChange = (totalFlow / _gridArea) * dtTime;
+				float newDepth = _waterCols[v][u].depth + depthChange;
+
+				// if the new depth is negative, scale down the negative flow
+				if (newDepth < 0) {
+					asNegDepth = true;
+
+					double totPosDepth = (totPosFlow / _gridArea) * dtTime;
+					double desNegDepth = -_waterCols[v][u].depth + totPosDepth;
+					double corNegFlow = (desNegDepth * _gridArea) / dtTime;
+					double corRatio = corNegFlow / totNegFlow;
+
+					if (lFlow < 0)
+						_waterCols[v][u].lFlow *= corRatio;
+					if (tFlow < 0)
+						_waterCols[v][u].tFlow *= corRatio;
+					if (rFlow < 0)
+						_waterCols[v][u + 1].lFlow *= corRatio;
+					if (bFlow < 0)
+						_waterCols[v + 1][u].tFlow *= corRatio;
+				}
 			}
 		}
 	}
