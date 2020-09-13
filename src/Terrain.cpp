@@ -11,7 +11,10 @@ Terrain::Terrain(std::string const mapPath, Gui & gui)
   _map(nullptr),
   _vao(0),
   _vbo(0),
-  _ebo(0)
+  _ebo(0),
+  _vaoB(0),
+  _vboB(0),
+  _eboB(0)
 {
 	// init static shader if null
 	if (!_sh) {
@@ -33,6 +36,9 @@ Terrain::~Terrain() {
 	glDeleteBuffers(1, &_vbo);
 	glDeleteBuffers(1, &_ebo);
 	glDeleteVertexArrays(1, &_vao);
+	glDeleteBuffers(1, &_vboB);
+	glDeleteBuffers(1, &_eboB);
+	glDeleteVertexArrays(1, &_vaoB);
 	_sh->unuse();
 
 	delete _water;
@@ -43,7 +49,10 @@ Terrain::Terrain(Terrain const &src)
   _map(nullptr),
   _vao(0),
   _vbo(0),
-  _ebo(0) {
+  _ebo(0),
+  _vaoB(0),
+  _vboB(0),
+  _eboB(0) {
 	*this = src;
 }
 
@@ -119,7 +128,13 @@ bool	Terrain::draw(bool wireframe) {
 	glBindVertexArray(_vao);
 	if (wireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	// draw terrain surface
 	glDrawElements(GL_TRIANGLE_STRIP, _indices.size(), GL_UNSIGNED_INT, 0);
+	// draw terrain border
+	glBindVertexArray(_vaoB);
+	glDrawElements(GL_TRIANGLE_STRIP, _indicesB.size(), GL_UNSIGNED_INT, 0);
+
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // reset polygon mode
 	glBindVertexArray(0);
 
@@ -228,6 +243,8 @@ glm::vec3	Terrain::_calculateNormal(uint32_t x, uint32_t z) {
 bool	Terrain::init() {
 	if (!_initMesh())
 		return false;
+	if (!_initMeshBorder())
+		return false;
 	if (!_water->init())
 		return false;
 	return true;
@@ -323,13 +340,86 @@ bool	Terrain::_initMesh() {
 	return true;
 }
 
-void	Terrain::_initColors() {
-	std::array<glm::vec3, 3>	colors = {
-		glm::vec3(0.92f, 0.85f, 0.69f),  // #EBD9B1
-		glm::vec3(0.61f, 0.76f, 0.2f),  // #9CC335
-		glm::vec3(0.54f, 0.5f, 0.56f)  // #8A808F
+bool	Terrain::_initMeshBorder() {
+	std::array<glm::vec2, 8> bPos = {
+		glm::vec2(0,				0),
+		glm::vec2(BOX_MAX_SIZE.x,	0),
+		glm::vec2(BOX_MAX_SIZE.x,	0),
+		glm::vec2(BOX_MAX_SIZE.x,	BOX_MAX_SIZE.z),
+		glm::vec2(BOX_MAX_SIZE.x,	BOX_MAX_SIZE.z),
+		glm::vec2(0,				BOX_MAX_SIZE.z),
+		glm::vec2(0,				BOX_MAX_SIZE.z),
+		glm::vec2(0,				0)
 	};
 
+	std::array<glm::vec2, 8> bNorm = {
+		glm::vec2(0, -1),
+		glm::vec2(1, 0),
+		glm::vec2(0, 1),
+		glm::vec2(-1, 0),
+	};
+
+	// fill vertices
+	float meshWidth = 8;
+	_verticesB = std::vector<TerrainVert>(meshWidth * 2, TerrainVert());
+	TerrainVert vert;
+	for (int32_t i = 0; i < meshWidth; ++i) {
+		vert.pos = {bPos[i][0], 0.0, bPos[i][1]};
+		vert.norm = {bNorm[i / 2][0], 0, bNorm[i / 2][1]};
+		vert.color = _borderColor;
+		_verticesB[i] = vert;
+		vert.pos = {vert.pos.x, -BOX_GROUND_HEIGHT, vert.pos.z};
+		_verticesB[i + meshWidth] = vert;
+	}
+
+	// fill indices
+	// We create a triangle strip to draw all the borders in one call
+	uint32_t a, b;
+	_indicesB.push_back(0);
+	for (uint16_t x = 0; x < meshWidth; ++x) {
+		a = x;
+		b = a + meshWidth;
+		_indicesB.push_back(a);
+		_indicesB.push_back(b);
+	}
+
+	// create vao, vbo, ebo
+	glGenVertexArrays(1, &_vaoB);
+	glGenBuffers(1, &_vboB);
+	glGenBuffers(1, &_eboB);
+
+	// fill vao buffer
+	glBindVertexArray(_vaoB);
+	glBindBuffer(GL_ARRAY_BUFFER, _vboB);
+	glBufferData(GL_ARRAY_BUFFER, _verticesB.size() * sizeof(TerrainVert),
+		&_verticesB[0], GL_STATIC_DRAW);
+
+	// set-up ebo
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _eboB);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indicesB.size() * sizeof(u_int32_t),
+		&_indicesB[0], GL_STATIC_DRAW);
+
+	// vertex positions
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TerrainVert),
+		reinterpret_cast<void *>(0));
+	// vertex normals
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TerrainVert),
+		reinterpret_cast<void *>(offsetof(TerrainVert, norm)));
+	// vertex colors
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(TerrainVert),
+		reinterpret_cast<void *>(offsetof(TerrainVert, color)));
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	return true;
+}
+
+void	Terrain::_initColors() {
 	// calc min/max height
 	float minH = _vertices[0].pos.y;
 	float maxH = minH;
@@ -342,23 +432,31 @@ void	Terrain::_initColors() {
 
 	// apply color based on the height ratio and the colors gradient array
 	float diffH = maxH - minH;
-	float step = 1.0 / (colors.size() - 1);
 	for (TerrainVert & vert : _vertices) {
 		float ratio = (vert.pos.y - minH) / diffH;
+		vert.color = _calcColor(ratio);
+	}
 
-		for (uint8_t i = 0; i < colors.size() - 1; ++i) {
-			if (ratio <= step * (i + 1)) {
-				// modify ratio to be between 0 -> 1
-				float minR = step * i;
-				float maxR = step * (i + 1);
-				float diffR = maxR - minR;
-				ratio = (ratio - minR) / diffR;
+	// init border color
+	float ratio = -minH / diffH;
+	_borderColor = _calcColor(ratio);
+}
 
-				vert.color = glm::lerp(colors[i], colors[i+1], ratio);
-				break;
-			}
+glm::vec3	Terrain::_calcColor(float ratio) {
+	float step = 1.0 / (_colors.size() - 1);
+
+	for (uint8_t i = 0; i < _colors.size() - 1; ++i) {
+		if (ratio <= step * (i + 1)) {
+			// modify ratio to be between 0 -> 1
+			float minR = step * i;
+			float maxR = step * (i + 1);
+			float diffR = maxR - minR;
+			ratio = (ratio - minR) / diffR;
+
+			return glm::lerp(_colors[i], _colors[i+1], ratio);
 		}
 	}
+	return {0, 0, 0};
 }
 
 
@@ -413,3 +511,9 @@ Terrain::TerrainException::TerrainException(const char* what_arg)
 
 // -- static initialisation ----------------------------------------------------
 std::unique_ptr<Shader> Terrain::_sh = nullptr;
+
+std::array<glm::vec3, 3>	Terrain::_colors = {
+	glm::vec3(0.92f, 0.85f, 0.69f),  // #EBD9B1
+	glm::vec3(0.61f, 0.76f, 0.2f),  // #9CC335
+	glm::vec3(0.54f, 0.5f, 0.56f)  // #8A808F
+};

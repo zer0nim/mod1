@@ -61,13 +61,16 @@ class Terrain {
 
 		void	_loadFile();
 		bool	_initMesh();
+		bool	_initMeshBorder();
 		std::vector<HeightPoint>	_getNClosest(glm::uvec2 pos, uint8_t n);
 		float	_calculateHeight(glm::uvec2 pos);
 		glm::vec3	_calculateNormal(uint32_t x, uint32_t z);
 		void	_initColors();
+		glm::vec3	_calcColor(float ratio);
 		void	_staticUniform();
 
 		static std::unique_ptr<Shader>	_sh;  /**< Shader */
+		static std::array<glm::vec3, 3>	_colors;
 		Gui				&_gui;
 		std::string		_mapPath;
 		SettingsJson	*_map;
@@ -78,6 +81,14 @@ class Terrain {
 		uint32_t	_vao;
 		uint32_t	_vbo;
 		uint32_t	_ebo;
+
+		// border mesh
+		std::vector<TerrainVert>	_verticesB;
+		std::vector<uint32_t>	_indicesB;
+		uint32_t	_vaoB;
+		uint32_t	_vboB;
+		uint32_t	_eboB;
+		glm::vec3	_borderColor;
 
 		Water	*_water;
 };
