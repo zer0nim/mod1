@@ -54,7 +54,9 @@ message(STATUS "Setting up stb...")
 include_directories(lib/stb)
 
 message(STATUS "Setting up glm...")
-find_package(glm REQUIRED)
+add_subdirectory(lib/glm)
+add_compile_definitions(GLM)
+include_directories(lib/glm)
 
 message(STATUS "Setting up Freetype...")
 add_subdirectory(lib/freetype)
@@ -74,7 +76,7 @@ FetchContent_Declare(json
   GIT_TAG v3.9.1)
 
 FetchContent_GetProperties(json)
-if(NOT json_POPULATED)
+if (NOT json_POPULATED)
   FetchContent_Populate(json)
   add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
