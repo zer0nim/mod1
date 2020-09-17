@@ -115,7 +115,7 @@ void	ETransform::setRot(glm::mat4 const rotM) {
 /**
  * @brief change the transform rotation and update the model matrix
  *
- * @param rotAngle the new rotation angle
+ * @param rotAngle the new rotation angle in radian
  * @param rotAxis the new rotation axis
  */
 void	ETransform::setRot(float const rotAngle, glm::vec3 const rotAxis) {
@@ -132,6 +132,25 @@ void	ETransform::setRot(float const rotAngle, glm::vec3 const rotAxis) {
 void	ETransform::setScale(glm::vec3 const scale) {
 	_scale = scale;
 	_updateModel();
+}
+
+/**
+ * @brief rotates the transform about axis passing through center.
+ * This modifies both the position and the rotation of the transform.
+ *
+ * @param center rotation center
+ * @param axis axis to rotate arround
+ * @param angle in degree
+ */
+void	ETransform::rotateAround(glm::vec3 center, glm::vec3 axis, float angle) {
+	// calculate new position
+	glm::quat rot = glm::angleAxis(glm::radians(angle), axis);
+    glm::vec3 dir = _pos - center;  // find current direction relative to center
+    dir = rot * dir;  // rotate the direction
+    _pos = center + dir; // define new position
+
+    // rotate object to keep looking at the center:
+    _rot *= glm::inverse(_rot) * rot * _rot;
 }
 
 // -- getters ------------------------------------------------------------------

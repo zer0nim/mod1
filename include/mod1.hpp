@@ -26,7 +26,7 @@
 #define CONTROLS_FILE			CONFIG_DIR"controls.json"
 
 #define MAX_POINTS_NB 50
-#define BOX_MAX_SIZE glm::vec3(64, 128, 64)
+#define BOX_MAX_SIZE glm::vec3(64, 64, 64)
 #define BOX_GROUND_HEIGHT 24
 
 void	initLogs();

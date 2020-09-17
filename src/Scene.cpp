@@ -7,11 +7,13 @@ Scene::Scene(std::vector<Terrain *> & terrains)
 : _terrains(terrains),
   _dtTime(0.0f),
   _fps(60),
-  _wireframeMode(false) {
+  _wireframeMode(false),
+  _orbitControls(nullptr) {
 	_terrainId = 0;
 }
 
 Scene::~Scene() {
+	delete _orbitControls;
 }
 
 Scene::Scene(Scene const &src)
@@ -31,7 +33,11 @@ bool	Scene::init() {
 		return false;
 	}
 
-	_gui.enableCursor(false);  // hide cursor
+	// init camera orbit controls
+	_orbitControls = new OrbitControls(_gui);
+	_orbitControls->setTarget(glm::vec3(
+		BOX_MAX_SIZE.x / 2, 0, BOX_MAX_SIZE.z / 2));
+	_orbitControls->setDistance(BOX_MAX_SIZE.y * 2, 30, BOX_MAX_SIZE.y * 3);
 
 	return true;
 }
@@ -70,7 +76,6 @@ bool	Scene::run() {
 bool	Scene::_update() {
 	Inputs::update();
 	_gui.update();
-	_gui.cam->update(_dtTime);
 
 	if (Inputs::getKeyByScancodeDown(SDL_SCANCODE_1))
 		_wireframeMode = !_wireframeMode;
@@ -81,10 +86,10 @@ bool	Scene::_update() {
 			_terrainId = 0;
 	}
 
-	if (!_terrains[_terrainId]->update(_dtTime)) {
+	if (!_terrains[_terrainId]->update(_dtTime))
 		return false;
-	}
-
+	if (!_orbitControls->update(_dtTime))
+		return false;
 	return true;
 }
 

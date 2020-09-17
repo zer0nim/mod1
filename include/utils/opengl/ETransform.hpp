@@ -28,6 +28,7 @@ class ETransform {
 		void	setRot(glm::mat4 const rotM);
 		void	setRot(float const rotAngle, glm::vec3 const rotAxis = WORLD_UP);
 		void	setScale(glm::vec3 const scale);
+		void	rotateAround(glm::vec3 center, glm::vec3 axis, float angle);
 
 		// -- getters ----------------------------------------------------------
 		glm::vec3	getPos() const;

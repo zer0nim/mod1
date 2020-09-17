@@ -240,7 +240,7 @@ bool	Gui::_initShaders() {
 
 	// -- camera ---------------------------------------------------------------
 	float ratio = static_cast<float>(gameInfo.windowSize.x) / gameInfo.windowSize.y;
-	cam = new Camera(*this, ratio, {0.0f, 25.0f, 0.0f});
+	cam = new Camera(*this, ratio);
 
 	// -- set default uniforms -------------------------------------------------
 	// projection
