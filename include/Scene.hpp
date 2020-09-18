@@ -29,8 +29,9 @@ class Scene {
 		float	_dtTime;
 		float	_fps;
 		bool	_wireframeMode;
-		uint32_t	_terrainId;
+		int32_t	_terrainId;
 		OrbitControls	* _orbitControls;
+		bool	_pause;
 };
 
 #endif  // SCENE_HPP_

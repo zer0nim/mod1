@@ -10,6 +10,7 @@ Scene::Scene(std::vector<Terrain *> & terrains)
   _wireframeMode(false),
   _orbitControls(nullptr) {
 	_terrainId = 0;
+	_pause = true;
 }
 
 Scene::~Scene() {
@@ -77,17 +78,34 @@ bool	Scene::_update() {
 	Inputs::update();
 	_gui.update();
 
+	// wireframe mode
 	if (Inputs::getKeyByScancodeDown(SDL_SCANCODE_1))
 		_wireframeMode = !_wireframeMode;
 
+	// play pause
 	if (Inputs::getKeyDown(InputType::ACTION)) {
-		++_terrainId;
-		if (_terrainId >= _terrains.size())
-			_terrainId = 0;
+		_pause = !_pause;
 	}
 
-	if (!_terrains[_terrainId]->update(_dtTime))
-		return false;
+	// next/previous map
+	if (Inputs::getKeyDown(InputType::INCREMENT_1) ||
+		Inputs::getKeyDown(InputType::DECREMENT_1))
+	{
+		_pause = true;
+		_terrainId += Inputs::getKeyDown(InputType::INCREMENT_1) ? 1 : -1;
+		if (_terrainId >= (int32_t)_terrains.size())
+			_terrainId = 0;
+		if (_terrainId < 0)
+			_terrainId = _terrains.size() - 1;
+	}
+
+	if (!_pause) {
+		// update terrains/water
+		if (!_terrains[_terrainId]->update(_dtTime))
+			return false;
+	}
+
+	// orbit controls
 	if (!_orbitControls->update(_dtTime))
 		return false;
 	return true;
