@@ -418,6 +418,13 @@ bool	Gui::getWindowsFlag(uint32_t flag) {
 	return flags & flag;
 }
 
+/**
+ * get Skybox const reference
+ */
+Skybox const & Gui::getSkybox() const {
+	return *_skybox;
+}
+
 // -- draw ---------------------------------------------------------------------
 /**
  * @brief called before drawing
@@ -461,7 +468,7 @@ void	Gui::drawSkybox(glm::mat4 &view) {
 	_skybox->getShader().use();
 	_skybox->getShader().setMat4("view", skyView);
 	_skybox->getShader().unuse();
-	_skybox->draw(0.5);
+	_skybox->draw(0.0);
 	_skybox->getShader().unuse();
 }
 

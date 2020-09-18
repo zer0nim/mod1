@@ -287,14 +287,21 @@ bool	Water::draw(bool wireframe) {
 	if (wireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+	// enable skybox texture
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, _gui.getSkybox().getTextureID());
+
 	// draw water surface
-	_sh->setVec4("wColor", 0.098, 0.619, 0.901, 0.7);  // #199ee6
+	_sh->setVec4("wColor", 0.482, 0.55, 0.729, 0.4);  // #7ba6ba
+	_sh->setBool("skyReflection", true);
 	glDrawElements(GL_TRIANGLE_STRIP, _indices.size(), GL_UNSIGNED_INT, 0);
 	// draw water border
 	glBindVertexArray(_vaoB);
-	_sh->setVec4("wColor", 0.098, 0.619, 0.901, 0.8);  // #199ee6
+	_sh->setVec4("wColor", 0.482, 0.55, 0.729, 0.55);  // #7ba6ba
+	_sh->setBool("skyReflection", false);
 	glDrawElements(GL_TRIANGLE_STRIP, _indicesB.size(), GL_UNSIGNED_INT, 0);
 
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);  // disable skybox texture
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // reset polygon mode
 	glBindVertexArray(0);
 

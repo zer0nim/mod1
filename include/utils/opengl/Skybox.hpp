@@ -10,9 +10,9 @@
 
 #define SKYBOX_USING 0
 #if SKYBOX_USING == 0
-	#define SKYBOX_START	"./asset/skybox/bomberSky/"
+	#define SKYBOX_START	"./asset/skybox/lake/"
 	#define SKYBOX_EXT		".jpg"
-	#define SKYBOX_NAME_TYPE 2
+	#define SKYBOX_NAME_TYPE 0
 #endif
 
 #if SKYBOX_NAME_TYPE == 0

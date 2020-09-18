@@ -55,6 +55,7 @@ class Gui {
 		void	updateFullscreen();
 		void	updateDimension();
 		bool	getWindowsFlag(uint32_t flag);
+		Skybox const & getSkybox() const;
 
 		GameInfo		gameInfo;  /**< GameInfo object */
 		TextureManager	*textureManager;  /**< TextureManager object */

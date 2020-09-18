@@ -27,6 +27,8 @@ uniform vec4 wColor;
 uniform vec3 viewPos;
 uniform DirLight dirLight;
 uniform Material	material;
+uniform samplerCube skybox;
+uniform bool skyReflection;
 
 vec3 calcDirLight(DirLight light, vec3 norm, vec3 viewDir) {
 	vec3	lightDir = normalize(-dirLight.direction);
@@ -63,9 +65,18 @@ void main() {
 	// Directional lighting
 	vec3	result = calcDirLight(dirLight, norm, viewDir);
 
-	fragColor = vec4(result, alpha);
+	if (skyReflection) {
+		// reflection
+		vec3 I = normalize(fs_in.FragPos - viewPos);
+		vec3 R = reflect(I, norm);
+		vec3 reflectColor = texture(skybox, R).rgb;
+
+		fragColor = vec4(mix(result, reflectColor, 0.4), alpha);
+	}
+	else {
+		fragColor = vec4(result, alpha);
+	}
 
 	// apply gamma correction
     fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / GAMMA));
-    // fragColor.rgb = norm;
 }
