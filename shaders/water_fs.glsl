@@ -71,7 +71,11 @@ void main() {
 		vec3 R = reflect(I, norm);
 		vec3 reflectColor = texture(skybox, R).rgb;
 
-		fragColor = vec4(mix(result, reflectColor, 0.4), alpha);
+		// fresnel effect (less reflection from above)
+		float refFactor = dot(viewDir, norm);
+		refFactor = pow(refFactor, 0.6);
+
+		fragColor = vec4(mix(reflectColor, result, refFactor), alpha);
 	}
 	else {
 		fragColor = vec4(result, alpha);

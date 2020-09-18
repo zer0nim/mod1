@@ -292,12 +292,12 @@ bool	Water::draw(bool wireframe) {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, _gui.getSkybox().getTextureID());
 
 	// draw water surface
-	_sh->setVec4("wColor", 0.482, 0.55, 0.729, 0.4);  // #7ba6ba
+	_sh->setVec4("wColor", 0.42, 0.58, 0.65, 0.5);  // #6d94a6
 	_sh->setBool("skyReflection", true);
 	glDrawElements(GL_TRIANGLE_STRIP, _indices.size(), GL_UNSIGNED_INT, 0);
 	// draw water border
 	glBindVertexArray(_vaoB);
-	_sh->setVec4("wColor", 0.482, 0.55, 0.729, 0.55);  // #7ba6ba
+	_sh->setVec4("wColor", 0.42, 0.58, 0.65, 0.6);  // #6d94a6
 	_sh->setBool("skyReflection", false);
 	glDrawElements(GL_TRIANGLE_STRIP, _indicesB.size(), GL_UNSIGNED_INT, 0);
 
