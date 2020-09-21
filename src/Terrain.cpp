@@ -14,7 +14,9 @@ Terrain::Terrain(std::string const mapPath, Gui & gui)
   _ebo(0),
   _vaoB(0),
   _vboB(0),
-  _eboB(0)
+  _eboB(0),
+  _minH(0),
+  _maxH(0)
 {
 	// init static shader if null
 	if (!_sh) {
@@ -52,7 +54,9 @@ Terrain::Terrain(Terrain const &src)
   _ebo(0),
   _vaoB(0),
   _vboB(0),
-  _eboB(0) {
+  _eboB(0),
+  _minH(0),
+  _maxH(0) {
 	*this = src;
 }
 
@@ -421,24 +425,24 @@ bool	Terrain::_initMeshBorder() {
 
 void	Terrain::_initColors() {
 	// calc min/max height
-	float minH = _vertices[0].pos.y;
-	float maxH = minH;
+	_minH = _vertices[0].pos.y;
+	_maxH = _minH;
 	for (TerrainVert & vert : _vertices) {
-		if (vert.pos.y < minH)
-			minH = vert.pos.y;
-		if (vert.pos.y > maxH)
-			maxH = vert.pos.y;
+		if (vert.pos.y < _minH)
+			_minH = vert.pos.y;
+		if (vert.pos.y > _maxH)
+			_maxH = vert.pos.y;
 	}
 
 	// apply color based on the height ratio and the colors gradient array
-	float diffH = maxH - minH;
+	float diffH = _maxH - _minH;
 	for (TerrainVert & vert : _vertices) {
-		float ratio = (vert.pos.y - minH) / diffH;
+		float ratio = (vert.pos.y - _minH) / diffH;
 		vert.color = _calcColor(ratio);
 	}
 
 	// init border color
-	float ratio = -minH / diffH;
+	float ratio = -_minH / diffH;
 	_borderColor = _calcColor(ratio);
 }
 
@@ -488,10 +492,16 @@ bool	Terrain::update(float dtTime) {
 	return _water->update(dtTime);
 }
 
+void	Terrain::setScenario(uint16_t scenarioId) {
+	_water->setScenario(scenarioId);
+}
+
 // -- getters ------------------------------------------------------------------
 float	Terrain::getHeight(uint32_t u, uint32_t v) const {
 	return TERRAIN_H(u, v);
 }
+float	Terrain::getMinHeight() const { return _minH; }
+float	Terrain::getMaxHeight() const { return _maxH; }
 
 // -- exceptions ---------------------------------------------------------------
 /**

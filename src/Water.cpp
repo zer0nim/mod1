@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstdlib>
 
 #include "Water.hpp"
 
@@ -18,6 +19,8 @@ std::unique_ptr<Shader> Water::_sh = nullptr;
 Water::Water(Terrain & terrain, Gui & gui)
 : _gui(gui),
   _terrain(terrain),
+  _firstInit(true),
+  _scenario(FlowScenario::EVEN_RISE),
   _vao(0),
   _vbo(0),
   _ebo(0),
@@ -65,27 +68,74 @@ Water &Water::operator=(Water const &rhs) {
 }
 
 bool	Water::init() {
-	// init column terrain height now to avoid retrieving it every update
+	// init water columns according to the scenario
 	for (uint32_t v = 0; v < WATER_GRID_RES.y; ++v) {
 		for (uint32_t u = 0; u < WATER_GRID_RES.x; ++u) {
-			uint32_t tU = (uint32_t)((u + 0.5) * _gridSpace.x);
-			uint32_t tV = (uint32_t)((v + 0.5) * _gridSpace.y);
-			_waterCols[v][u].terrainH = _terrain.getHeight(tU, tV);
+			_waterCols[v][u].lFlow = 0;
+			_waterCols[v][u].tFlow = 0;
+			_waterCols[v][u].depth = 0;
 
-			// init left waters column at 0 to test
-			if (u == 0)
-				_waterCols[v][u].depth = 30.0;
+			if (_scenario == FlowScenario::EVEN_RISE) {
+				// set terrain height to minimum
+				_waterCols[v][u].terrainH = _terrain.getMinHeight();
+			}
+			else {
+				// retrieve terrain height
+				uint32_t tU = (uint32_t)((u + 0.5) * _gridSpace.x);
+				uint32_t tV = (uint32_t)((v + 0.5) * _gridSpace.y);
+				_waterCols[v][u].terrainH = _terrain.getHeight(tU, tV);
+			}
+
+			// init wave water columns
+			if (_scenario == FlowScenario::WAVE) {
+				// init left waters column at 0 to test
+				if (u == WATER_GRID_RES.x - 1)
+					_waterCols[v][u].depth = 30.0;
+			}
 		}
 	}
 
-	if (!_initMesh())
+	// init/update mesh
+	if (_firstInit) {
+		_firstInit = false;
+		if (!_initMesh() || !_initMeshBorder())
+			return false;
+	}
+	else if (!_updateMesh() || !_updateMeshBorder()) {
 		return false;
-	if (!_initMeshBorder())
-		return false;
+	}
 	return true;
 }
 
+void	Water::_scenarioUpdate(float dtTime) {
+	if (_scenario == FlowScenario::EVEN_RISE) {
+		float wMaxDepth = _terrain.getMaxHeight() - _terrain.getMinHeight() + 2;
+		float riseSpeed = 5;
+
+		for (uint32_t v = 0; v < WATER_GRID_RES.y; ++v) {
+			for (uint32_t u = 0; u < WATER_GRID_RES.x; ++u) {
+				_waterCols[v][u].depth += riseSpeed * dtTime;
+				_waterCols[v][u].depth = std::min(wMaxDepth, _waterCols[v][u].depth);
+			}
+		}
+	}
+	else if (_scenario == FlowScenario::RAINING) {
+		float rainAmount = .5;
+
+		for (uint32_t v = 0; v < WATER_GRID_RES.y; ++v) {
+			for (uint32_t u = 0; u < WATER_GRID_RES.x; ++u) {
+				if (rand() % 100 < 10) {
+					_waterCols[v][u].depth += rainAmount * dtTime;
+				}
+			}
+		}
+	}
+}
+
 bool	Water::update(float dtTime) {
+	// update water columns according to the scenario
+	_scenarioUpdate(dtTime);
+
 	// update all water columns
 	for (uint32_t v = 0; v < WATER_GRID_RES.y; ++v) {
 		for (uint32_t u = 0; u < WATER_GRID_RES.x; ++u) {
@@ -308,6 +358,11 @@ bool	Water::draw(bool wireframe) {
 	_sh->unuse();
 
 	return true;
+}
+
+void	Water::setScenario(uint16_t scenarioId) {
+	_scenario = static_cast<FlowScenario::Enum>(scenarioId);
+	init();
 }
 
 bool	Water::_initMesh() {

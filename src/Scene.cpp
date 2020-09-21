@@ -10,6 +10,7 @@ Scene::Scene(std::vector<Terrain *> & terrains)
   _wireframeMode(false),
   _orbitControls(nullptr) {
 	_terrainId = 0;
+	_scenarioId = 0;
 	_pause = true;
 }
 
@@ -97,6 +98,17 @@ bool	Scene::_update() {
 			_terrainId = 0;
 		if (_terrainId < 0)
 			_terrainId = _terrains.size() - 1;
+	}
+
+	// next scenario
+	if (Inputs::getKeyDown(InputType::GOTO_MENU)) {
+		_pause = true;
+		++_scenarioId;
+		if (_scenarioId >= FlowScenario::COUNT)
+			_scenarioId = 0;
+		for (Terrain * t : _terrains) {
+			t->setScenario(_scenarioId);
+		}
 	}
 
 	if (!_pause) {

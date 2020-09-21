@@ -38,7 +38,10 @@ class Terrain {
 		bool	init();
 		bool	update(float dtTime);
 		bool	draw(bool wireframe = false);
+		void	setScenario(uint16_t scenarioId);
 		float	getHeight(uint32_t u, uint32_t v) const;
+		float	getMinHeight() const;
+		float	getMaxHeight() const;
 
 		// -- exceptions -------------------------------------------------------
 		/**
@@ -91,6 +94,8 @@ class Terrain {
 		glm::vec3	_borderColor;
 
 		Water	*_water;
+		float	_minH;
+		float	_maxH;
 };
 
 #endif  // TERRAIN_HPP_

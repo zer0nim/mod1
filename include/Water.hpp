@@ -1,7 +1,6 @@
 #ifndef WATER_HPP_
 #define WATER_HPP_
 
-// gravity, m/s
 #define WATER_GRID_RES glm::vec2(BOX_MAX_SIZE.x - 1, BOX_MAX_SIZE.z - 1)
 #define WATER_H(u, v) (_vertices[(v) * (WATER_GRID_RES.x + 1) + (u)].pos.y)
 
@@ -21,6 +20,19 @@ namespace FlowDir {
 		BOTTOM
 	};
 }  // namespace FlowDir
+
+namespace FlowScenario {
+	/**
+	 * @brief Flow scenario
+	 */
+	enum Enum {
+		EVEN_RISE = 0,
+		WAVE,
+		RAINING,
+		COUNT
+	};
+}  // namespace FlowScenario
+
 
 // flow, m3 water /s, positive flow mean increasing water level
 struct	WaterColum {
@@ -47,6 +59,7 @@ class Water {
 		bool	init();
 		bool	update(float dtTime);
 		bool	draw(bool wireframe = false);
+		void	setScenario(uint16_t scenarioId);
 
 	private:
 		static glm::vec2 const	_gridSpace;
@@ -56,6 +69,8 @@ class Water {
 
 		Gui	& _gui;
 		Terrain	& _terrain;
+		bool	_firstInit;
+		FlowScenario::Enum	_scenario;
 		float	_gravity;  // gravity in m/s
 		std::vector< std::vector<WaterColum> >	_waterCols;  // all water columns
 
@@ -72,6 +87,7 @@ class Water {
 		uint32_t	_vboB;
 		uint32_t	_eboB;
 
+		void	_scenarioUpdate(float dtTime);
 		void	_updateFlow(uint32_t u, uint32_t v, float dtTime);
 		void	_updateDepth(uint32_t u, uint32_t v, float dtTime);
 		void	_correctNegWaterDepth(float dtTime);

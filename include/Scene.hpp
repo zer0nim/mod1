@@ -6,6 +6,7 @@
 #include "mod1.hpp"
 #include "Gui.hpp"
 #include "Terrain.hpp"
+#include "Water.hpp"
 #include "OrbitControls.hpp"
 
 class Scene {
@@ -30,6 +31,7 @@ class Scene {
 		float	_fps;
 		bool	_wireframeMode;
 		int32_t	_terrainId;
+		int32_t	_scenarioId;
 		OrbitControls	* _orbitControls;
 		bool	_pause;
 };
