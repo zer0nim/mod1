@@ -23,8 +23,8 @@ class TextRender {
 		TextRender &operator=(TextRender const &rhs);
 		void loadFont(std::string name, std::string const &filename, uint32_t size);
 		void write(std::string const &fontName, std::string text, glm::vec3 pos, GLfloat scale = 1,
-			glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f), int outline = 0,
-			glm::vec3 colorOutline = glm::vec3(1.0f, 1.0f, 1.0f));
+			glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), int outline = 0,
+			glm::vec4 colorOutline = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 		uint32_t	strWidth(std::string const &fontName, std::string text, GLfloat scale = 1);
 		uint32_t	strHeight(std::string const &fontName, GLfloat scale = 1, bool fullHeight = false);
 

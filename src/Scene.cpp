@@ -16,6 +16,7 @@ Scene::Scene(std::vector<Terrain *> & terrains)
 
 Scene::~Scene() {
 	delete _orbitControls;
+	delete _infosUI;
 }
 
 Scene::Scene(Scene const &src)
@@ -40,6 +41,10 @@ bool	Scene::init() {
 	_orbitControls->setTarget(glm::vec3(
 		BOX_MAX_SIZE.x / 2, 0, BOX_MAX_SIZE.z / 2));
 	_orbitControls->setDistance(BOX_MAX_SIZE.y * 2, 30, BOX_MAX_SIZE.y * 3);
+
+	// init UI
+	_infosUI = new InfosUI(_gui, *this);
+	_infosUI->init();
 
 	return true;
 }
@@ -78,6 +83,9 @@ bool	Scene::run() {
 bool	Scene::_update() {
 	Inputs::update();
 	_gui.update();
+
+	// update ui infos
+	_infosUI->update(_dtTime);
 
 	// wireframe mode
 	if (Inputs::getKeyByScancodeDown(SDL_SCANCODE_1))
@@ -132,6 +140,8 @@ bool	Scene::_draw() {
 			return false;
 	}
 
+	_infosUI->draw();
+
 	return true;
 }
 
@@ -142,3 +152,7 @@ float	Scene::getDtTime() const { return _dtTime; }
 uint16_t	Scene::getFps() const {
 	return std::clamp(_fps, 0.0f, float(s.j("screen").u("maxFps")));
 }
+
+uint16_t	Scene::getTerrainId() const { return _terrainId; }
+uint16_t	Scene::getScenarioId() const { return _scenarioId; }
+bool	Scene::getPause() const { return _pause; }

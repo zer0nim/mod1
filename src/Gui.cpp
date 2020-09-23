@@ -116,6 +116,21 @@ bool	Gui::init() {
 		return false;
 	}
 
+	/* init UI interface */
+	try {
+		gameInfo.savedWindowSize.x = s.j("graphics").i("width");
+		gameInfo.savedWindowSize.y = s.j("graphics").i("height");
+		gameInfo.isSavedFullscreen = s.j("graphics").b("fullscreen");
+		ABaseUI::init(gameInfo.windowSize, s.j("fonts").j("base").s("file"), s.j("fonts").j("base").u("size"));
+		ABaseUI::loadFont("title", s.j("fonts").j("base").s("file"), s.j("fonts").j("base").u("size") * 2.5);
+		ABaseUI::loadFont("cheatcode", s.j("fonts").j("cheatcode").s("file"), s.j("fonts").j("cheatcode").u("size") * 3);
+		ABaseUI::loadFont("pause", s.j("fonts").j("cheatcode").s("file"), s.j("fonts").j("cheatcode").u("size") * 10);
+	}
+	catch (ABaseUI::UIException const & e) {
+		logErr(e.what());
+		return false;
+	}
+
 	return true;
 }
 

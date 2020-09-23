@@ -77,13 +77,57 @@ bool	initSettings(std::string const & filename) {
 	/* font */
 	s.add<SettingsJson>("fonts");
 		s.j("fonts").add<SettingsJson>("base");
-			s.j("fonts").j("base").add<std::string>("file", "asset/font/monaco.ttf")
+			s.j("fonts").j("base").add<std::string>("file", "asset/font/Roboto-Regular.ttf")
 				.setDescription("this is the main font");
 			s.j("fonts").j("base").add<uint64_t>("size", 20).setMin(5).setMax(50)
 				.setDescription("default size for the text");
+		s.j("fonts").add<SettingsJson>("cheatcode");
+			s.j("fonts").j("cheatcode").add<std::string>("file", "asset/font/monaco.ttf")
+				.setDescription("this is the font for cheatcode");
+			s.j("fonts").j("cheatcode").add<uint64_t>("size", 6).setMin(5).setMax(50)
+				.setDescription("default size for the text (cheatcode)");
 
 	/* colors */
 	s.add<SettingsJson>("colors");
+
+	s.j("colors").add<SettingsJson>("red");
+		s.j("colors").j("red").add<uint64_t>("color", 0xCF647A).setMin(0x000000).setMax(0xFFFFFF);
+		s.j("colors").j("red").add<uint64_t>("alpha", 0xFF).setMin(0x00).setMax(0xFF);
+	s.j("colors").add<SettingsJson>("orange");
+		s.j("colors").j("orange").add<uint64_t>("color", 0xCF8466).setMin(0x000000).setMax(0xFFFFFF);
+		s.j("colors").j("orange").add<uint64_t>("alpha", 0xFF).setMin(0x00).setMax(0xFF);
+	s.j("colors").add<SettingsJson>("blue");
+		s.j("colors").j("blue").add<uint64_t>("color", 0x647BCE).setMin(0x000000).setMax(0xFFFFFF);
+		s.j("colors").j("blue").add<uint64_t>("alpha", 0xFF).setMin(0x00).setMax(0xFF);
+	s.j("colors").add<SettingsJson>("blue-light");
+		s.j("colors").j("blue-light").add<uint64_t>("color", 0x94A1C7).setMin(0x000000).setMax(0xFFFFFF);
+		s.j("colors").j("blue-light").add<uint64_t>("alpha", 0xFF).setMin(0x00).setMax(0xFF);
+	s.j("colors").add<SettingsJson>("white");
+		s.j("colors").j("white").add<uint64_t>("color", 0xf8f4ef).setMin(0x000000).setMax(0xFFFFFF);
+		s.j("colors").j("white").add<uint64_t>("alpha", 0xFF).setMin(0x00).setMax(0xFF);
+	s.j("colors").add<SettingsJson>("light-white");
+		s.j("colors").j("light-white").add<uint64_t>("color", 0x828282).setMin(0x000000).setMax(0xFFFFFF);
+		s.j("colors").j("light-white").add<uint64_t>("alpha", 0xFF).setMin(0x00).setMax(0xFF);
+	s.j("colors").add<SettingsJson>("black");
+		s.j("colors").j("black").add<uint64_t>("color", 0x181818).setMin(0x000000).setMax(0xFFFFFF);
+		s.j("colors").j("black").add<uint64_t>("alpha", 0xFF).setMin(0x00).setMax(0xFF);
+	s.j("colors").add<SettingsJson>("gray");
+		s.j("colors").j("gray").add<uint64_t>("color", 0x1B1B1B).setMin(0x000000).setMax(0xFFFFFF);
+		s.j("colors").j("gray").add<uint64_t>("alpha", 0xFF).setMin(0x00).setMax(0xFF);
+	s.j("colors").add<SettingsJson>("light-gray");
+		s.j("colors").j("light-gray").add<uint64_t>("color", 0x2D2D2D).setMin(0x000000).setMax(0xFFFFFF);
+		s.j("colors").j("light-gray").add<uint64_t>("alpha", 0xFF).setMin(0x00).setMax(0xFF);
+
+	// buttons colors
+	s.j("colors").add<SettingsJson>("buttons");
+		s.j("colors").j("buttons").add<uint64_t>("color", 0x121212).setMin(0x000000).setMax(0xFFFFFF);
+		s.j("colors").j("buttons").add<uint64_t>("alpha", 0xFF).setMin(0x00).setMax(0xFF);
+	s.j("colors").add<SettingsJson>("buttons-disable");
+		s.j("colors").j("buttons-disable").add<uint64_t>("color", 0x94A1C7).setMin(0x000000).setMax(0xFFFFFF);
+		s.j("colors").j("buttons-disable").add<uint64_t>("alpha", 0xFF).setMin(0x00).setMax(0xFF);
+	s.j("colors").add<SettingsJson>("buttons-border");
+		s.j("colors").j("buttons-border").add<uint64_t>("color", 0x575757).setMin(0x000000).setMax(0xFFFFFF);
+		s.j("colors").j("buttons-border").add<uint64_t>("alpha", 0xFF).setMin(0x00).setMax(0xFF);
 
 	// font color
 	s.j("colors").add<SettingsJson>("font");
@@ -94,6 +138,12 @@ bool	initSettings(std::string const & filename) {
 	s.j("colors").add<SettingsJson>("background");
 		s.j("colors").j("background").add<uint64_t>("color", 0x181818).setMin(0x000000).setMax(0xFFFFFF);
 		s.j("colors").j("background").add<uint64_t>("alpha", 0xFF).setMin(0x00).setMax(0xFF);
+	s.j("colors").add<SettingsJson>("bg-rect");
+		s.j("colors").j("bg-rect").add<uint64_t>("color", 0xf8f4ef).setMin(0x000000).setMax(0xFFFFFF);
+		s.j("colors").j("bg-rect").add<uint64_t>("alpha", 0x55).setMin(0x00).setMax(0xFF);
+	s.j("colors").add<SettingsJson>("bg-rect-border");
+		s.j("colors").j("bg-rect-border").add<uint64_t>("color", 0xCF647A).setMin(0x000000).setMax(0xFFFFFF);
+		s.j("colors").j("bg-rect-border").add<uint64_t>("alpha", 0xFF).setMin(0x00).setMax(0xFF);
 
 	// collider
 	s.j("colors").add<SettingsJson>("collider");

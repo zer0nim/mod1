@@ -160,13 +160,13 @@ void TextRender::setWinSize(glm::vec2 winSize) {
  * @param colorOutline The color of outline
  */
 void TextRender::write(std::string const &fontName, std::string text, glm::vec3 pos,
-GLfloat scale, glm::vec3 color, int outline, glm::vec3 colorOutline) {
+GLfloat scale, glm::vec4 color, int outline, glm::vec4 colorOutline) {
 	if (font.find(fontName) == font.end()) {
 		logErr("invalid font name " << fontName);
 		return;
 	}
 	_shader.use();
-	_shader.setVec3("textColor", color);
+	_shader.setVec4("textColor", color);
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(_vao);
 	glm::vec3 savePos = pos;
@@ -176,7 +176,7 @@ GLfloat scale, glm::vec3 color, int outline, glm::vec3 colorOutline) {
 		// move cursor to the next character
 		pos.x += (ch.advance >> 6) * scale;
 	}
-	_shader.setVec3("textColor", colorOutline);
+	_shader.setVec4("textColor", colorOutline);
 	if (outline > 0) {
 		pos = savePos;
 		for (auto c = text.begin(); c != text.end(); c++) {  // foreach chars

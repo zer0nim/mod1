@@ -24,6 +24,7 @@ ABaseUI::ABaseUI(glm::vec2 pos, glm::vec2 size)
   _mouseHoverColor(UI_DEF_MOUSE_HOVER_COLOR),
   _mouseHoverColorText(UI_DEF_MOUSE_HOVER_COLOR_TEXT),
   _mouseClickColor(UI_DEF_MOUSE_CLICK_COLOR),
+  _mouseClickBorderColor(UI_DEF_MOUSE_CLICK_BORDER_COLOR),
   _mouseClickColorText(UI_DEF_MOUSE_CLICK_COLOR_TEXT),
   _text(UI_DEF_TEXT),
   _textColor(UI_DEF_TEXT_COLOR),
@@ -202,13 +203,16 @@ void ABaseUI::draw() {
 			uint32_t height = _textRender->strHeight(_helpFont, _helpTextScale);
 
 			tmpSize = glm::vec2(width + _helpPadding, height + _helpPadding);
-			tmpPos.x = getRealPos().x + _size.x - tmpSize.x - _borderSize - _helpPadding;
-			tmpPos.y = getRealPos().y + _borderSize + _helpPadding;
+			tmpPos.x = getRealPos().x + _size.x / 2 - tmpSize.x / 2;
+			tmpPos.y = getRealPos().y + _borderSize * 2 - _size.y;
 
-			_drawText(tmpPos, tmpSize, _z, _helpFont, _helpTextScale, helpText, _textColor, TextAlign::CENTER, 0);
+			glm::vec4 helpTextColor(0, 0, 0, 1);
+			_drawText(tmpPos, tmpSize, _z, _helpFont, _helpTextScale, helpText, helpTextColor, TextAlign::CENTER, 0);
 
 			_drawBorderRect(tmpPos, tmpSize, _z, _helpBorderSize, _helpBorderColor);
-			_drawRect(tmpPos, tmpSize, _z, _color);
+
+			glm::vec4 helpColor = colorise(s.j("colors").j("white").u("color"));
+			_drawRect(tmpPos, tmpSize, _z, helpColor);
 		}
 	}
 
@@ -489,6 +493,14 @@ ABaseUI &	ABaseUI::setMouseHoverColorText(glm::vec4 color) { _mouseHoverColorTex
  * @return ABaseUI& A reference to this UI element
  */
 ABaseUI &	ABaseUI::setMouseClickColor(glm::vec4 color) { _mouseClickColor = color; return *this; }
+
+/**
+ * @brief Set the mouse click color
+ *
+ * @param color mouse click color
+ * @return ABaseUI& A reference to this UI element
+ */
+ABaseUI &	ABaseUI::setMouseClickBorderColor(glm::vec4 color) { _mouseClickBorderColor = color; return *this; }
 
 /**
  * @brief Set the mouse click color text

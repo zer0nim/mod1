@@ -12,8 +12,14 @@ glm::vec2 const	Water::_pipeLen = _gridSpace;
 
 // grid box area
 float const	Water::_gridArea = Water::_gridSpace.x * Water::_gridSpace.y;
-
+// shader
 std::unique_ptr<Shader> Water::_sh = nullptr;
+// flowScenario names
+const std::string	Water::flowScenarioName[] = {
+	"even rise",
+	"wave",
+	"raining"
+};
 
 // -- members ------------------------------------------------------------------
 Water::Water(Terrain & terrain, Gui & gui)

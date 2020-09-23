@@ -61,6 +61,8 @@ class Water {
 		bool	draw(bool wireframe = false);
 		void	setScenario(uint16_t scenarioId);
 
+		static const std::string	flowScenarioName[FlowScenario::COUNT];
+
 	private:
 		static glm::vec2 const	_gridSpace;
 		static glm::vec2 const	_pipeLen;

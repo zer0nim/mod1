@@ -8,6 +8,7 @@
 #include "Terrain.hpp"
 #include "Water.hpp"
 #include "OrbitControls.hpp"
+#include "InfosUI.hpp"
 
 class Scene {
 	public:
@@ -21,6 +22,10 @@ class Scene {
 		Gui &	getGui();
 		float	getDtTime() const;
 		uint16_t	getFps() const;
+		uint16_t	getTerrainId() const;
+		uint16_t	getScenarioId() const;
+		bool	getPause() const;
+
 	private:
 		bool	_update();
 		bool	_draw();
@@ -34,6 +39,7 @@ class Scene {
 		int32_t	_scenarioId;
 		OrbitControls	* _orbitControls;
 		bool	_pause;
+		InfosUI *	_infosUI;
 };
 
 #endif  // SCENE_HPP_

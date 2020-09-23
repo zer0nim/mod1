@@ -6,6 +6,7 @@ project(mod1 VERSION 1.0.0 DESCRIPTION "Basic water flow simulation" LANGUAGES C
 
 message(STATUS "Setting up include headers directory...")
 include_directories(include)
+include_directories(include/scenes)
 include_directories(include/utils)
 include_directories(include/utils/opengl)
 include_directories(include/utils/opengl/UI)

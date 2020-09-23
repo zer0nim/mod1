@@ -103,7 +103,7 @@ std::string const & text, glm::vec4 color, TextAlign::Enum align, float padding)
 	if (_textOutline > 0) {
 		textOutline = size.y / 3 * _textOutline;
 	}
-	_textRender->write(font, text, {tmpPos.x, tmpPos.y, z}, scale, glm::vec3(color.x, color.y, color.z),
+	_textRender->write(font, text, {tmpPos.x, tmpPos.y, z}, scale, color,
 		textOutline, _textOutlineColor);
 }
 

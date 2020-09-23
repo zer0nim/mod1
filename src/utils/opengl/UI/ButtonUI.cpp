@@ -99,5 +99,6 @@ void ButtonUI::_draw() {
 	_drawRect(tmpPos, tmpSize, _z, _color, secColor, factor);
 
 	// draw border
-	_drawBorderRect(getRealPos(), _size, _z, _borderSize, _borderColor);
+	glm::vec4 borderColor = _leftClick ? _mouseClickBorderColor : _borderColor;
+	_drawBorderRect(getRealPos(), _size, _z, _borderSize, borderColor);
 }
