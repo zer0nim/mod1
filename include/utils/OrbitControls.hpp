@@ -22,7 +22,7 @@ class OrbitControls {
 		OrbitControls &operator=(OrbitControls const &rhs);
 
 		bool	update(float dtTime);
-		void	setDistance(float dist, float min, float max);
+		void	setDistance(int32_t dist, int32_t min, int32_t max);
 		void	setTarget(glm::vec3 target);
 
 	private:

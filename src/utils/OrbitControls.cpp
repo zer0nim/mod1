@@ -3,6 +3,9 @@
 OrbitControls::OrbitControls(Gui & gui, float startVertAngle)
 : _gui(gui),
   _cam(*_gui.cam) {
+	_distance = 0;
+	_minDistance = 0;
+	_maxDistance = 0;
 	setTarget({0, 0, 0});
 	setDistance(10, 1, 20);
 	_mousePressed = false;
@@ -81,7 +84,7 @@ bool	OrbitControls::update(float dtTime) {
 	return true;
 }
 
-void	OrbitControls::setDistance(float dist, float min, float max) {
+void	OrbitControls::setDistance(int32_t dist, int32_t min, int32_t max) {
 	if (min > dist || max < dist || min > max) {
 		logErr("setDistance(" << dist << ", " << min << ", " << max << "), "
 			" impossible args: min <= dist <= max");
