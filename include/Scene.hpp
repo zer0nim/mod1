@@ -10,6 +10,14 @@
 #include "OrbitControls.hpp"
 #include "InfosUI.hpp"
 
+// store the ui inputs state
+struct	UiState {
+	bool leftBtn;
+	bool rightBtn;
+	bool scenarioBtn;
+	UiState();
+};
+
 class Scene {
 	public:
 		Scene(std::vector<Terrain *> & terrains);
@@ -39,6 +47,7 @@ class Scene {
 		int32_t	_scenarioId;
 		OrbitControls	* _orbitControls;
 		bool	_pause;
+		UiState	_uiState;
 		InfosUI *	_infosUI;
 };
 

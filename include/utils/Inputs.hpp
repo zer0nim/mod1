@@ -56,6 +56,7 @@ public:
 	static bool								getKeyUp(InputType::Enum type);
 	static bool								getKeyDown(InputType::Enum type);
 	static std::string						getKeyName(InputType::Enum type);
+	static SDL_Scancode						getKeySdlScancode(InputType::Enum type);
 	static void								configureKey(InputType::Enum type);
 	static void								cancelConfiguration();
 	static bool								getKeyByScancode(SDL_Scancode scancode);
@@ -88,6 +89,7 @@ private:
 	bool									_getKeyUp(InputType::Enum type) const;
 	bool									_getKeyDown(InputType::Enum type) const;
 	std::string								_getKeyName(InputType::Enum type) const;
+	SDL_Scancode							_getKeySdlScancode(InputType::Enum type) const;
 	void									_configureKey(InputType::Enum type);
 	void									_cancelConfiguration();
 	bool									_getKeyByScancode(SDL_Scancode scancode) const;

@@ -13,6 +13,7 @@
 #include "AUserInterface.hpp"
 #include "TextInputUI.hpp"
 class Scene;  // to avoid inclusion loop
+struct UiState;
 
 /**
  * @brief debug menu to show fps at the top of the screen
@@ -20,7 +21,7 @@ class Scene;  // to avoid inclusion loop
 class InfosUI : public AUserInterface {
 	public:
 		// Constructors
-		InfosUI(Gui & gui, Scene const & scene);
+		InfosUI(Gui & gui, Scene const & scene, UiState & uiState);
 		virtual ~InfosUI();
 		InfosUI(InfosUI const &src);
 		InfosUI &operator=(InfosUI const &rhs);
@@ -33,6 +34,7 @@ class InfosUI : public AUserInterface {
 		InfosUI();
 
 		Scene	const & _scene;  /**< Scene reference */
+		UiState &	_uiState;  /**< UiState reference */
 		std::chrono::milliseconds	_lastUpdateMs;  /**< Last time fps was updated */
 		uint16_t	_fps;  /**< Actual FPS */
 		TextUI *	_fpsText;

@@ -9,9 +9,10 @@
  *
  * @param gui A pointer on the gui object
  */
-InfosUI::InfosUI(Gui & gui, Scene const & scene)
+InfosUI::InfosUI(Gui & gui, Scene const & scene, UiState & uiState)
 : AUserInterface(gui),
-  _scene(scene)
+  _scene(scene),
+  _uiState(uiState)
 {
 	_lastUpdateMs = getMs();
 	_fps = _scene.getFps();
@@ -30,7 +31,8 @@ InfosUI::~InfosUI() {
  */
 InfosUI::InfosUI(InfosUI const &src)
 : AUserInterface(src),
-  _scene(src._scene) {
+  _scene(src._scene),
+  _uiState(src._uiState) {
 	*this = src;
 }
 
@@ -55,6 +57,8 @@ InfosUI &InfosUI::operator=(InfosUI const &rhs) {
  * @return false if the init failed
  */
 bool InfosUI::init() {
+	bool leftButtonState, rightButtonState, scenarioButtonState;
+
 	glm::vec2 winSz = _gui.gameInfo.windowSize;
 	glm::vec2 pos, size, ui, sizeTmp;
 	glm::vec2 marg(4, 4);
@@ -96,7 +100,8 @@ bool InfosUI::init() {
 		size = {ui.x, ui.y};
 		pos = {winSz.x / 2 - sizeTmp.x / 2 - size.x - marg.x, winSz.y - 4 - ui.y};
 		addButton(pos, size, str)
-			.setKeyLeftClickScancode(SDL_Scancode::SDL_SCANCODE_LEFT)
+			.setKeyLeftClickScancode(Inputs::getKeySdlScancode(InputType::DECREMENT_1))
+			.addButtonLeftListener(&_uiState.leftBtn)
 			.setTextScale(UI_FONT_SCALE)
 			.setTextColor(UI_TEXT_COLOR)
 			.setZ(1)
@@ -106,7 +111,8 @@ bool InfosUI::init() {
 		str = ">";
 		pos = {winSz.x / 2 + sizeTmp.x / 2 + marg.x, winSz.y - 4 - ui.y};
 		addButton(pos, size, str)
-			.setKeyLeftClickScancode(SDL_Scancode::SDL_SCANCODE_RIGHT)
+			.setKeyLeftClickScancode(Inputs::getKeySdlScancode(InputType::INCREMENT_1))
+			.addButtonLeftListener(&_uiState.rightBtn)
 			.setTextScale(UI_FONT_SCALE)
 			.setTextColor(UI_TEXT_COLOR)
 			.setZ(1)
@@ -119,7 +125,8 @@ bool InfosUI::init() {
 		sizeTmp = size;
 		pos = {marg.x, winSz.y - 4 - ui.y};
 		addButton(pos, size, str)
-			.setKeyLeftClickScancode(SDL_Scancode::SDL_SCANCODE_TAB)
+			.setKeyLeftClickScancode(Inputs::getKeySdlScancode(InputType::GOTO_MENU))
+			.addButtonLeftListener(&_uiState.scenarioBtn)
 			.setTextScale(UI_FONT_SCALE)
 			.setTextColor(UI_TEXT_COLOR)
 			.setZ(1)

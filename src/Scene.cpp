@@ -43,7 +43,7 @@ bool	Scene::init() {
 	_orbitControls->setDistance(BOX_MAX_SIZE.y * 2, 30, BOX_MAX_SIZE.y * 3);
 
 	// init UI
-	_infosUI = new InfosUI(_gui, *this);
+	_infosUI = new InfosUI(_gui, *this, _uiState);
 	_infosUI->init();
 
 	return true;
@@ -97,11 +97,11 @@ bool	Scene::_update() {
 	}
 
 	// next/previous map
-	if (Inputs::getKeyDown(InputType::INCREMENT_1) ||
-		Inputs::getKeyDown(InputType::DECREMENT_1))
-	{
+	if (_uiState.leftBtn || _uiState.rightBtn) {
 		_pause = true;
-		_terrainId += Inputs::getKeyDown(InputType::INCREMENT_1) ? 1 : -1;
+		_terrainId += _uiState.rightBtn ? 1 : -1;
+		_uiState.rightBtn = false;
+		_uiState.leftBtn = false;
 		if (_terrainId >= (int32_t)_terrains.size())
 			_terrainId = 0;
 		if (_terrainId < 0)
@@ -109,7 +109,8 @@ bool	Scene::_update() {
 	}
 
 	// next scenario
-	if (Inputs::getKeyDown(InputType::GOTO_MENU)) {
+	if (_uiState.scenarioBtn) {
+		_uiState.scenarioBtn = false;
 		_pause = true;
 		++_scenarioId;
 		if (_scenarioId >= FlowScenario::COUNT)
@@ -156,3 +157,10 @@ uint16_t	Scene::getFps() const {
 uint16_t	Scene::getTerrainId() const { return _terrainId; }
 uint16_t	Scene::getScenarioId() const { return _scenarioId; }
 bool	Scene::getPause() const { return _pause; }
+
+// -- UiState ------------------------------------------------------------------
+UiState::UiState() {
+	leftBtn = false;
+	rightBtn = false;
+	scenarioBtn = false;
+}

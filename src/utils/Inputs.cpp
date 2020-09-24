@@ -188,6 +188,30 @@ std::string			Inputs::_getKeyName(InputType::Enum type) const {
 }
 
 /**
+ * @brief Get the SDL scancode of a given key
+ *
+ * @param type The key
+ * @return SDL_Scancode of the key
+ */
+SDL_Scancode	Inputs::getKeySdlScancode(InputType::Enum type) {
+	return (Inputs::get()._getKeySdlScancode(type));
+}
+/**
+ * @brief Get the SDL scancode of a given key
+ *
+ * @param type The key
+ * @return SDL_Scancode of the key
+ */
+SDL_Scancode	Inputs::_getKeySdlScancode(InputType::Enum type) const {
+	for (auto it = _input_key_map.begin(); it != _input_key_map.end(); ++it) {
+		if (it->second == type)
+			return it->first;
+	}
+	logErr("[getKeySdlScancode] unknow key for type: " << input_type_name[type]);
+	return SDL_Scancode::SDL_SCANCODE_UNKNOWN;
+}
+
+/**
 	Configure the action passed to be associated to the next key pressed.
 	This function will change the execution of the update function.
 
