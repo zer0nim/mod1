@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <glad/glad.h>
 #include <stb_image.h>
 #include <ft2build.h>

@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <ghc/filesystem.hpp>
 
 #include "FileUtils.hpp"
 #include "Logging.hpp"
@@ -12,9 +13,9 @@ namespace file {
 	 * @return true If the file exist
 	 */
 	bool isFile(std::string const & path) {
-		std::filesystem::path	p1(path);
+		ghc::filesystem::path	p1(path);
 
-		return std::filesystem::is_regular_file(p1);
+		return ghc::filesystem::is_regular_file(p1);
 	}
 
 	/**
@@ -24,9 +25,9 @@ namespace file {
 	 * @return true If the directory exist
 	 */
 	bool	isDir(std::string const & path) {
-		std::filesystem::path	p1(path);
+		ghc::filesystem::path	p1(path);
 
-		return std::filesystem::is_directory(p1);
+		return ghc::filesystem::is_directory(p1);
 	}
 
 	/**
@@ -40,7 +41,7 @@ namespace file {
 		bool		error = false;
 		std::string	msg = "";
 		try {
-			std::filesystem::create_directories(path);
+			ghc::filesystem::create_directories(path);
 			if (file::isDir(path) == false)
 				error = true;
 		}
@@ -67,7 +68,7 @@ namespace file {
 		bool		error = false;
 		std::string	msg = "";
 		try {
-			std::filesystem::remove_all(path);
+			ghc::filesystem::remove_all(path);
 			if (file::isDir(path))
 				error = true;
 		}
@@ -99,8 +100,8 @@ namespace file {
 			return list;
 		}
 
-		for (auto& p: std::filesystem::directory_iterator(path)) {
-			if (std::filesystem::is_regular_file(p.path())) {
+		for (auto& p: ghc::filesystem::directory_iterator(path)) {
+			if (ghc::filesystem::is_regular_file(p.path())) {
 				std::string currentFile = p.path().string();
 				list.push_back(currentFile);
 			}

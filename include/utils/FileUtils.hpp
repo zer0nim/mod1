@@ -2,7 +2,6 @@
 
 #include <string>
 #include <vector>
-#include <filesystem>
 
 namespace file {
 	bool	isFile(std::string const & path);

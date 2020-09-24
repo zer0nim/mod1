@@ -10,7 +10,6 @@
 #define VOID_POS glm::ivec2 {-1, -1}
 #define VOID_POS3 glm::vec3 {-1, -1, -1}
 
-#include <SDL2/SDL.h>
 #include <iostream>
 #include <array>
 

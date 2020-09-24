@@ -16,3 +16,6 @@
 [submodule "lib/assimp"]
 	path = lib/assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "lib/filesystem"]
+	path = lib/filesystem
+	url = https://github.com/gulrak/filesystem

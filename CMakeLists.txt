@@ -54,6 +54,10 @@ include_directories(lib/sdl/include)
 message(STATUS "Setting up stb...")
 include_directories(lib/stb)
 
+message(STATUS "Setting up filesystem...")
+add_subdirectory(lib/filesystem)
+include_directories(lib/filesystem)
+
 message(STATUS "Setting up glm...")
 add_subdirectory(lib/glm)
 add_compile_definitions(GLM)
@@ -82,6 +86,9 @@ if (NOT json_POPULATED)
   add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
+message(STATUS "Setting up OpenGL...")
+find_package(OpenGL REQUIRED)
+
 # - build options --------------------------------------------------------------
 
 message(STATUS "Setting up build options...")
@@ -90,19 +97,6 @@ add_executable(mod1 ${SRC_FILES})
 
 set_property(TARGET mod1 PROPERTY CXX_STANDARD 17)
 set_property(TARGET mod1 PROPERTY CXX_STANDARD_REQUIRED ON)
-
-# test that filesystem header actually is there and works
-try_compile(HAS_FS "${CMAKE_BINARY_DIR}/temp"
-"${CMAKE_SOURCE_DIR}/test/hasFilesystem.cpp"
-            CMAKE_FLAGS -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=ON
-            LINK_LIBRARIES stdc++fs)
-if(HAS_FS)
-    message(STATUS "Compiler has filesystem support")
-else()
-    message(FATAL_ERROR "Compiler is missing filesystem capabilities")
-endif(HAS_FS)
-
-target_compile_options(mod1 PUBLIC -l SDL2 -lGL)
 
 if (UNIX)
 	target_compile_options(mod1 PUBLIC -Wall -Wextra)
@@ -116,11 +110,9 @@ endif()
 # - linking --------------------------------------------------------------------
 
 message(STATUS "Linking...")
-target_link_libraries(mod1 PRIVATE stdc++fs)  # for c++17 filesystem support
-find_package(OpenGL REQUIRED)
-target_link_libraries(mod1 PRIVATE OpenGL)
 target_link_libraries(mod1 PRIVATE glad ${CMAKE_DL_LIBS})
 target_link_libraries(mod1 PRIVATE SDL2)
+target_link_libraries(mod1 PRIVATE ghc_filesystem)
 target_link_libraries(mod1 PRIVATE glm)
 target_link_libraries(mod1 PRIVATE freetype)
 target_link_libraries(mod1 PRIVATE assimp)
