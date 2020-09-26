@@ -214,7 +214,8 @@ void	Water::_updateFlow(uint32_t u, uint32_t v, float dtTime) {
 			freeWaterH = totalHDiff > _waterCols[v][u - 1].depth ? _waterCols[v][u - 1].depth : totalHDiff;
 			hDiff = freeWaterH;
 		}
-		pipeCSA = _gridSpace.x * freeWaterH;
+		// * uncomment for dynamic cross-sectional area of the pipe
+		// pipeCSA = _gridSpace.x * freeWaterH;
 
 		_waterCols[v][u].lFlow += pipeCSA * (_gravity / _pipeLen.x) * hDiff * dtTime;
 	}
@@ -246,7 +247,8 @@ void	Water::_updateFlow(uint32_t u, uint32_t v, float dtTime) {
 			freeWaterH = totalHDiff > _waterCols[v - 1][u].depth ? _waterCols[v - 1][u].depth : totalHDiff;
 			hDiff = freeWaterH;
 		}
-		pipeCSA = _gridSpace.y * freeWaterH;
+		// * uncomment for dynamic cross-sectional area of the pipe
+		// pipeCSA = _gridSpace.y * freeWaterH;
 
 		_waterCols[v][u].tFlow += pipeCSA * (_gravity / _pipeLen.y) * hDiff * dtTime;
 	}
