@@ -643,37 +643,37 @@ class SettingsJson {
 		template<class T>
 		std::map<std::string, JsonObj<T> *> const & _getMap() const {
 			if (typeid(T) == typeid(int64_t)) {
-				std::map<std::string, JsonObj<T> *> const *__attribute__((__may_alias__)) ptr = \
+				std::map<std::string, JsonObj<T> *> const * ptr = \
 					reinterpret_cast<std::map<std::string, JsonObj<T> *> const *>(&intMap);
 				return *ptr;
 			}
 			if (typeid(T) == typeid(uint64_t)) {
-				std::map<std::string, JsonObj<T> *> const *__attribute__((__may_alias__)) ptr = \
+				std::map<std::string, JsonObj<T> *> const * ptr = \
 					reinterpret_cast<std::map<std::string, JsonObj<T> *> const *>(&uintMap);
 				return *ptr;
 			}
 			if (typeid(T) == typeid(double)) {
-				std::map<std::string, JsonObj<T> *> const *__attribute__((__may_alias__)) ptr = \
+				std::map<std::string, JsonObj<T> *> const * ptr = \
 					reinterpret_cast<std::map<std::string, JsonObj<T> *> const *>(&doubleMap);
 				return *ptr;
 			}
 			if (typeid(T) == typeid(bool)) {
-				std::map<std::string, JsonObj<T> *> const *__attribute__((__may_alias__)) ptr = \
+				std::map<std::string, JsonObj<T> *> const * ptr = \
 					reinterpret_cast<std::map<std::string, JsonObj<T> *> const *>(&boolMap);
 				return *ptr;
 			}
 			if (typeid(T) == typeid(std::string)) {
-				std::map<std::string, JsonObj<T> *> const *__attribute__((__may_alias__)) ptr = \
+				std::map<std::string, JsonObj<T> *> const * ptr = \
 					reinterpret_cast<std::map<std::string, JsonObj<T> *> const *>(&stringMap);
 				return *ptr;
 			}
 			if (typeid(T) == typeid(SettingsJson)) {
-				std::map<std::string, JsonObj<T> *> const *__attribute__((__may_alias__)) ptr = \
+				std::map<std::string, JsonObj<T> *> const * ptr = \
 					reinterpret_cast<std::map<std::string, JsonObj<T> *> const *>(&jsonMap);
 				return *ptr;
 			}
 			if (typeid(T) == typeid(SettingsList<SettingsJson>)) {
-				std::map<std::string, JsonObj<T> *> const *__attribute__((__may_alias__)) ptr = \
+				std::map<std::string, JsonObj<T> *> const * ptr = \
 					reinterpret_cast<std::map<std::string, JsonObj<T> *> const *>(&jsonList);
 				return *ptr;
 			}
@@ -688,37 +688,37 @@ class SettingsJson {
 		template<class T>
 		std::map<std::string, JsonObj<T> *> & _getMap() {
 			if (typeid(T) == typeid(int64_t)) {
-				std::map<std::string, JsonObj<T> *> *__attribute__((__may_alias__)) ptr = \
+				std::map<std::string, JsonObj<T> *> * ptr = \
 					reinterpret_cast<std::map<std::string, JsonObj<T> *> *>(&intMap);
 				return *ptr;
 			}
 			if (typeid(T) == typeid(uint64_t)) {
-				std::map<std::string, JsonObj<T> *> *__attribute__((__may_alias__)) ptr = \
+				std::map<std::string, JsonObj<T> *> * ptr = \
 					reinterpret_cast<std::map<std::string, JsonObj<T> *> *>(&uintMap);
 				return *ptr;
 			}
 			if (typeid(T) == typeid(double)) {
-				std::map<std::string, JsonObj<T> *> *__attribute__((__may_alias__)) ptr = \
+				std::map<std::string, JsonObj<T> *> * ptr = \
 					reinterpret_cast<std::map<std::string, JsonObj<T> *> *>(&doubleMap);
 				return *ptr;
 			}
 			if (typeid(T) == typeid(bool)) {
-				std::map<std::string, JsonObj<T> *> *__attribute__((__may_alias__)) ptr = \
+				std::map<std::string, JsonObj<T> *> * ptr = \
 					reinterpret_cast<std::map<std::string, JsonObj<T> *> *>(&boolMap);
 				return *ptr;
 			}
 			if (typeid(T) == typeid(std::string)) {
-				std::map<std::string, JsonObj<T> *> *__attribute__((__may_alias__)) ptr = \
+				std::map<std::string, JsonObj<T> *> * ptr = \
 					reinterpret_cast<std::map<std::string, JsonObj<T> *> *>(&stringMap);
 				return *ptr;
 			}
 			if (typeid(T) == typeid(SettingsJson)) {
-				std::map<std::string, JsonObj<T> *> *__attribute__((__may_alias__)) ptr = \
+				std::map<std::string, JsonObj<T> *> * ptr = \
 					reinterpret_cast<std::map<std::string, JsonObj<T> *> *>(&jsonMap);
 				return *ptr;
 			}
 			if (typeid(T) == typeid(SettingsList<SettingsJson>)) {
-				std::map<std::string, JsonObj<T> *> *__attribute__((__may_alias__)) ptr = \
+				std::map<std::string, JsonObj<T> *> * ptr = \
 					reinterpret_cast<std::map<std::string, JsonObj<T> *> *>(&jsonList);
 				return *ptr;
 			}

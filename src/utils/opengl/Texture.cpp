@@ -18,7 +18,7 @@ uint32_t	textureFromFile(std::string const path, bool inSpaceSRGB, glm::ivec2 *s
 {
 	int			formatId;
 	glm::ivec2	size;
-	u_char		*data;
+	unsigned char	*data;
 
 	// if the caller want to retrieve the real image size
 	if (sizeOut != nullptr) {
@@ -77,7 +77,7 @@ uint32_t	textureFromFbx(aiScene const *scene, int locationId, bool inSpaceSRGB,
 	int			formatId;
 	glm::ivec2	size;
 	aiTexture	*texture = nullptr;
-	u_char		*data;
+	unsigned char	*data;
 
 	// retrieve texture
 	texture = scene->mTextures[locationId];

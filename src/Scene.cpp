@@ -1,5 +1,10 @@
 #include <algorithm>
-#include <unistd.h>
+
+#ifdef _WIN32
+	#include <windows.h>
+#else
+	#include <unistd.h>
+#endif
 
 #include "Scene.hpp"
 
@@ -72,8 +77,15 @@ bool	Scene::run() {
 			std::chrono::milliseconds loopDuration = getMs() - lastLoopMs;
 			float	frameDuration = loopDuration.count();
 
-			if (frameDuration <= maxFrameDuration)
-				usleep((maxFrameDuration - frameDuration) * 1000);
+			if (frameDuration <= maxFrameDuration) {
+				float sleepMs = maxFrameDuration - frameDuration;
+
+				#ifdef _WIN32
+					Sleep(sleepMs);
+				#else
+					usleep(sleepMs * 1000);
+				#endif
+			}
 		}
 	}
 

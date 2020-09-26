@@ -438,7 +438,7 @@ bool	Water::_initMesh() {
 
 	// set-up ebo
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(u_int32_t),
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(uint32_t),
 		&_indices[0], GL_STATIC_DRAW);
 
 	// vertex positions
@@ -512,7 +512,7 @@ bool	Water::_initMeshBorder() {
 
 	// set-up ebo
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _eboB);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indicesB.size() * sizeof(u_int32_t),
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indicesB.size() * sizeof(uint32_t),
 		&_indicesB[0], GL_STATIC_DRAW);
 
 	// vertex positions

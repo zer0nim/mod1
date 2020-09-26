@@ -212,7 +212,7 @@ void	Mesh::sendMesh() {
 
 	// set-up ebo
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _vertIndices.size() * sizeof(u_int32_t),
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _vertIndices.size() * sizeof(uint32_t),
 		&_vertIndices[0], GL_STATIC_DRAW);
 
 	// vertex positions
@@ -253,8 +253,8 @@ void	Mesh::sendMesh() {
  * @param weight the weight of the bone to the vertex
  * @param vertexID the vertex id
  */
-void Mesh::addBoneData(u_int32_t boneID, float weight, u_int32_t vertexID) {
-	for (u_int32_t i = 0; i < NB_BONES_PER_VERTEX; ++i) {
+void Mesh::addBoneData(uint32_t boneID, float weight, uint32_t vertexID) {
+	for (uint32_t i = 0; i < NB_BONES_PER_VERTEX; ++i) {
 		// if the vertex bone weight as not been set
 		if (_vertices[vertexID].bonesW[i] == 0.0f) {
 			_vertices[vertexID].bonesId[i] = boneID;
