@@ -43,6 +43,7 @@ Water::Water(Terrain & terrain, Gui & gui)
 	// allocate _waterCols 2d array
 	_waterCols = std::vector< std::vector<WaterColum> >(
 		WATER_GRID_RES.y, std::vector<WaterColum>(WATER_GRID_RES.x, WaterColum()));
+	_lastRainUpdate = getMs();
 }
 
 Water::~Water() {
@@ -126,12 +127,17 @@ void	Water::_scenarioUpdate(float dtTime) {
 		}
 	}
 	else if (_scenario == FlowScenario::RAINING) {
-		float rainAmount = .5;
+		float rainAmount = 1.8;
 
-		for (uint32_t v = 0; v < WATER_GRID_RES.y; ++v) {
-			for (uint32_t u = 0; u < WATER_GRID_RES.x; ++u) {
-				if (rand() % 100 < 10) {
-					_waterCols[v][u].depth += rainAmount * dtTime;
+		// rain drop
+		if (getMs().count() - _lastRainUpdate.count() > 80) {
+			_lastRainUpdate = getMs();
+
+			for (uint32_t v = 0; v < WATER_GRID_RES.y; ++v) {
+				for (uint32_t u = 0; u < WATER_GRID_RES.x; ++u) {
+					if (rand() % 100 < 8) {
+						_waterCols[v][u].depth += rainAmount * dtTime;
+					}
 				}
 			}
 		}

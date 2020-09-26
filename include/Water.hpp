@@ -89,6 +89,8 @@ class Water {
 		uint32_t	_vboB;
 		uint32_t	_eboB;
 
+		std::chrono::milliseconds	_lastRainUpdate;
+
 		void	_scenarioUpdate(float dtTime);
 		void	_updateFlow(uint32_t u, uint32_t v, float dtTime);
 		void	_updateDepth(uint32_t u, uint32_t v, float dtTime);
