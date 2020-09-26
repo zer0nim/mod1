@@ -97,7 +97,9 @@ bool	Water::init() {
 			if (_scenario == FlowScenario::WAVE) {
 				// init left waters column at 0 to test
 				if (u == WATER_GRID_RES.x - 1)
-					_waterCols[v][u].depth = 30.0;
+					_waterCols[v][u].depth = 26.0;
+				else if (u == WATER_GRID_RES.x - 2)
+					_waterCols[v][u].depth = 25.0;
 			}
 		}
 	}
