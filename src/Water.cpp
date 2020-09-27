@@ -82,16 +82,10 @@ bool	Water::init() {
 			_waterCols[v][u].tFlow = 0;
 			_waterCols[v][u].depth = 0;
 
-			if (_scenario == FlowScenario::EVEN_RISE) {
-				// set terrain height to minimum
-				_waterCols[v][u].terrainH = _terrain.getMinHeight();
-			}
-			else {
-				// retrieve terrain height
-				uint32_t tU = (uint32_t)((u + 0.5) * _gridSpace.x);
-				uint32_t tV = (uint32_t)((v + 0.5) * _gridSpace.y);
-				_waterCols[v][u].terrainH = _terrain.getHeight(tU, tV);
-			}
+			// retrieve terrain height
+			uint32_t tU = (uint32_t)((u + 0.5) * _gridSpace.x);
+			uint32_t tV = (uint32_t)((v + 0.5) * _gridSpace.y);
+			_waterCols[v][u].terrainH = _terrain.getHeight(tU, tV);
 
 			// init wave water columns
 			if (_scenario == FlowScenario::WAVE) {
@@ -100,6 +94,9 @@ bool	Water::init() {
 					_waterCols[v][u].depth = 26.0;
 				else if (u == WATER_GRID_RES.x - 2)
 					_waterCols[v][u].depth = 25.0;
+			}
+			else if (_scenario == FlowScenario::EVEN_RISE) {
+				_currentRiseH = _terrain.getMinHeight();
 			}
 		}
 	}
@@ -118,15 +115,21 @@ bool	Water::init() {
 
 void	Water::_scenarioUpdate(float dtTime) {
 	if (_scenario == FlowScenario::EVEN_RISE) {
-		float wMaxDepth = _terrain.getMaxHeight() - _terrain.getMinHeight() + 2;
-		float riseSpeed = 5;
+		float riseSpeed = 1.5;
+		float maxPorousH = std::min(_currentRiseH, 5.0f);
+		float maxRiseH = (_terrain.getMaxHeight() - _terrain.getMinHeight()) * 2.0;
 
-		for (uint32_t v = 0; v < WATER_GRID_RES.y; ++v) {
-			for (uint32_t u = 0; u < WATER_GRID_RES.x; ++u) {
-				_waterCols[v][u].depth += riseSpeed * dtTime;
-				_waterCols[v][u].depth = std::min(wMaxDepth, _waterCols[v][u].depth);
+		if (_currentRiseH < maxRiseH) {
+			for (uint32_t v = 0; v < WATER_GRID_RES.y; ++v) {
+				for (uint32_t u = 0; u < WATER_GRID_RES.x; ++u) {
+					if (_waterCols[v][u].terrainH <= maxPorousH) {
+						_waterCols[v][u].depth += riseSpeed * dtTime;
+					}
+				}
 			}
 		}
+
+		_currentRiseH += riseSpeed * dtTime;
 	}
 	else if (_scenario == FlowScenario::RAINING) {
 		float rainAmount = 1.8;
