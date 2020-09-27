@@ -485,13 +485,19 @@ bool	Water::_initMesh() {
 }
 
 bool	Water::_updateMesh() {
-	// update vertices pos/normals/visibility
+	// update vertices pos/visibility
 	bool noWater = true;
 	for (WaterVert & vert : _vertices) {
 		uint16_t x = std::round(vert.pos.x / _gridSpace.x);
 		uint16_t z = std::round(vert.pos.z / _gridSpace.y);
 		vert.pos = glm::vec3(vert.pos.x, _calculateHeight(x, z, noWater), vert.pos.z);
 		vert.visible = noWater ? 0.0 : 1.0;
+	}
+
+	// update normals
+	for (WaterVert & vert : _vertices) {
+		uint16_t x = std::round(vert.pos.x / _gridSpace.x);
+		uint16_t z = std::round(vert.pos.z / _gridSpace.y);
 		vert.norm = _calculateNormal(x, z);
 	}
 
