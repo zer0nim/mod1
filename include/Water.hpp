@@ -29,6 +29,7 @@ namespace FlowScenario {
 		EVEN_RISE = 0,
 		WAVE,
 		RAINING,
+		DRAIN,
 		COUNT
 	};
 }  // namespace FlowScenario

@@ -18,7 +18,8 @@ std::unique_ptr<Shader> Water::_sh = nullptr;
 const std::string	Water::flowScenarioName[] = {
 	"even rise",
 	"wave",
-	"raining"
+	"raining",
+	"drain"
 };
 
 // -- members ------------------------------------------------------------------
@@ -98,6 +99,10 @@ bool	Water::init() {
 			else if (_scenario == FlowScenario::EVEN_RISE) {
 				_currentRiseH = _terrain.getMinHeight();
 			}
+			else if (_scenario == FlowScenario::DRAIN) {
+				float startWaterH = _terrain.getMaxHeight() + 2 - _waterCols[v][u].terrainH;
+				_waterCols[v][u].depth = startWaterH;
+			}
 		}
 	}
 
@@ -143,6 +148,19 @@ void	Water::_scenarioUpdate(float dtTime) {
 					if (rand() % 100 < 8) {
 						_waterCols[v][u].depth += rainAmount * dtTime;
 					}
+				}
+			}
+		}
+	}
+	else if (_scenario == FlowScenario::DRAIN) {
+		float drainSpeed = 1.5;
+		float porousH = 5.0f;
+
+		for (uint32_t v = 0; v < WATER_GRID_RES.y; ++v) {
+			for (uint32_t u = 0; u < WATER_GRID_RES.x; ++u) {
+				if (_waterCols[v][u].terrainH <= porousH && _waterCols[v][u].depth > 0) {
+					_waterCols[v][u].depth -= drainSpeed * dtTime;
+					_waterCols[v][u].depth = std::max(0.0f, _waterCols[v][u].depth);
 				}
 			}
 		}
