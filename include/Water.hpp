@@ -3,6 +3,7 @@
 
 #define WATER_GRID_RES glm::vec2(BOX_MAX_SIZE.x - 1, BOX_MAX_SIZE.z - 1)
 #define WATER_H(u, v) (_vertices[(v) * (WATER_GRID_RES.x + 1) + (u)].pos.y)
+#define WATER_MIN_DISPLAY_H 0.02
 
 #include <vector>
 
@@ -104,7 +105,7 @@ class Water {
 		bool	_initMeshBorder();
 		void	_updateBorderVertices();
 		bool	_updateMeshBorder();
-		float	_calculateHeight(uint32_t x, uint32_t z, bool & noWater);
+		float	_calculateHeight(uint32_t x, uint32_t z, float & waterDepth);
 		glm::vec3	_calculateNormal(uint32_t x, uint32_t z);
 		void	_staticUniform();
 };

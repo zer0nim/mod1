@@ -9,7 +9,7 @@
 glm::vec2 const	Water::_gridSpace = glm::vec2(
 	BOX_MAX_SIZE.x / WATER_GRID_RES.x, BOX_MAX_SIZE.z / WATER_GRID_RES.y);
 // water grid pipe length
-glm::vec2 const	Water::_pipeLen = _gridSpace;
+glm::vec2 const	Water::_pipeLen = _gridSpace / 1.5f;
 
 // grid box area
 float const	Water::_gridArea = Water::_gridSpace.x * Water::_gridSpace.y;
@@ -260,7 +260,7 @@ void	Water::_updateFlow(uint32_t u, uint32_t v, float dtTime) {
 			hDiff = freeWaterH;
 		}
 		// * comment for static cross-sectional area of the pipe
-		pipeCSA = _gridSpace.x * freeWaterH;
+		pipeCSA = std::max(_gridSpace.x * freeWaterH, _gridArea);
 
 		_waterCols[v][u].lFlow += pipeCSA * (_gravity / _pipeLen.x) * hDiff * dtTime;
 	}
@@ -293,7 +293,7 @@ void	Water::_updateFlow(uint32_t u, uint32_t v, float dtTime) {
 			hDiff = freeWaterH;
 		}
 		// * comment for static cross-sectional area of the pipe
-		pipeCSA = _gridSpace.y * freeWaterH;
+		pipeCSA = std::max(_gridSpace.y * freeWaterH, _gridArea);
 
 		_waterCols[v][u].tFlow += pipeCSA * (_gravity / _pipeLen.y) * hDiff * dtTime;
 	}
@@ -428,12 +428,12 @@ void	Water::setScenario(uint16_t scenarioId) {
 
 bool	Water::_initMesh() {
 	// fill vertices
+	float waterDepth;
 	for (uint16_t z = 0; z < WATER_GRID_RES.y + 1; ++z) {
 		for (uint16_t x = 0; x < WATER_GRID_RES.x + 1; ++x) {
 			WaterVert vert;
-			bool noWater = true;
-			vert.pos = {_gridSpace.x * x, _calculateHeight(x, z, noWater), _gridSpace.y * z};
-			vert.visible = noWater ? 0.0 : 1.0;
+			vert.pos = {_gridSpace.x * x, _calculateHeight(x, z, waterDepth), _gridSpace.y * z};
+			vert.visible = waterDepth < WATER_MIN_DISPLAY_H ? waterDepth / WATER_MIN_DISPLAY_H : 1.0;
 			_vertices.push_back(vert);
 		}
 	}
@@ -510,12 +510,12 @@ bool	Water::_initMesh() {
 
 bool	Water::_updateMesh() {
 	// update vertices pos/visibility
-	bool noWater = true;
+	float waterDepth;
 	for (WaterVert & vert : _vertices) {
 		uint16_t x = std::round(vert.pos.x / _gridSpace.x);
 		uint16_t z = std::round(vert.pos.z / _gridSpace.y);
-		vert.pos = glm::vec3(vert.pos.x, _calculateHeight(x, z, noWater), vert.pos.z);
-		vert.visible = noWater ? 0.0 : 1.0;
+		vert.pos = glm::vec3(vert.pos.x, _calculateHeight(x, z, waterDepth), vert.pos.z);
+		vert.visible = waterDepth < WATER_MIN_DISPLAY_H ? waterDepth / WATER_MIN_DISPLAY_H : 1.0;
 	}
 
 	// update normals
@@ -602,45 +602,42 @@ void	Water::_updateBorderVertices() {
 	float meshWidth = (WATER_GRID_RES.x + 1) * 2 + (WATER_GRID_RES.y + 1) * 2;
 	uint32_t i = 0;
 	WaterVert vert;
+	float waterDepth;
 	for (int32_t x = 0; x < WATER_GRID_RES.x + 1; ++x) {
-		bool noWater = true;
-		float depth = _calculateHeight(x, 0, noWater);
+		float depth = _calculateHeight(x, 0, waterDepth);
 		vert.pos = {x * _gridSpace.x, depth, 0};
 		vert.norm = {0, 0, -1};
-		vert.visible = noWater ? 0.0 : 1.0;
+		vert.visible = waterDepth < WATER_MIN_DISPLAY_H ? waterDepth / WATER_MIN_DISPLAY_H : 1.0;
 		_verticesB[i] = vert;
 		vert.pos = {vert.pos.x, 0.0, vert.pos.z};
 		_verticesB[i + meshWidth] = vert;
 		++i;
 	}
 	for (int32_t z = 0; z < WATER_GRID_RES.y + 1; ++z) {
-		bool noWater = true;
-		float depth = _calculateHeight(WATER_GRID_RES.x, z, noWater);
+		float depth = _calculateHeight(WATER_GRID_RES.x, z, waterDepth);
 		vert.pos = {WATER_GRID_RES.x * _gridSpace.x, depth, z * _gridSpace.y};
 		vert.norm = {1, 0, 0};
-		vert.visible = noWater ? 0.0 : 1.0;
+		vert.visible = waterDepth < WATER_MIN_DISPLAY_H ? waterDepth / WATER_MIN_DISPLAY_H : 1.0;
 		_verticesB[i] = vert;
 		vert.pos = {vert.pos.x, 0.0, vert.pos.z};
 		_verticesB[i + meshWidth] = vert;
 		++i;
 	}
 	for (int32_t x = WATER_GRID_RES.x; x >= 0; --x) {
-		bool noWater = true;
-		float depth = _calculateHeight(x, WATER_GRID_RES.y, noWater);
+		float depth = _calculateHeight(x, WATER_GRID_RES.y, waterDepth);
 		vert.pos = {x * _gridSpace.x, depth, WATER_GRID_RES.y * _gridSpace.y};
 		vert.norm = {0, 0, 1};
-		vert.visible = noWater ? 0.0 : 1.0;
+		vert.visible = waterDepth < WATER_MIN_DISPLAY_H ? waterDepth / WATER_MIN_DISPLAY_H : 1.0;
 		_verticesB[i] = vert;
 		vert.pos = {vert.pos.x, 0.0, vert.pos.z};
 		_verticesB[i + meshWidth] = vert;
 		++i;
 	}
 	for (int32_t z = WATER_GRID_RES.y; z >= 0; --z) {
-		bool noWater = true;
-		float depth = _calculateHeight(0, z, noWater);
+		float depth = _calculateHeight(0, z, waterDepth);
 		vert.pos = {0, depth, z * _gridSpace.y};
 		vert.norm = {-1, 0, 0};
-		vert.visible = noWater ? 0.0 : 1.0;
+		vert.visible = waterDepth < WATER_MIN_DISPLAY_H ? waterDepth / WATER_MIN_DISPLAY_H : 1.0;
 		_verticesB[i] = vert;
 		vert.pos = {vert.pos.x, 0.0, vert.pos.z};
 		_verticesB[i + meshWidth] = vert;
@@ -648,50 +645,43 @@ void	Water::_updateBorderVertices() {
 	}
 }
 
-float	Water::_calculateHeight(uint32_t x, uint32_t z, bool & noWater) {
+float	Water::_calculateHeight(uint32_t x, uint32_t z, float & waterDepth) {
 	float hL, hR, hB, hT;
 
-	noWater = true;
 	uint32_t zHoriz = z < WATER_GRID_RES.y ? z : z - 1;
 	// hL
 	if (x != 0) {
 		hL = _waterCols[zHoriz][x - 1].depth;
-		noWater = noWater && (hL == 0);
 	}
 	else {
 		hL = _waterCols[zHoriz][0].depth;
-		noWater = noWater && (hL == 0);
 	}
 	// hR
 	if (x < WATER_GRID_RES.x) {
 		hR = _waterCols[zHoriz][x].depth;
-		noWater = noWater && (hR == 0);
 	}
 	else {
 		hR = _waterCols[zHoriz][x - 1].depth;
-		noWater = noWater && (hR == 0);
 	}
 	uint32_t xVert = x < WATER_GRID_RES.x ? x : x - 1;
 	// hT
 	if (z != 0) {
 		hB = _waterCols[z - 1][xVert].depth;
-		noWater = noWater && (hB == 0);
 	}
 	else {
 		hB = _waterCols[0][xVert].depth;
-		noWater = noWater && (hB == 0);
 	}
 	// hB
 	if (z < WATER_GRID_RES.y) {
 		hT = _waterCols[z][xVert].depth;
-		noWater = noWater && (hT == 0);
 	}
 	else {
 		hT = _waterCols[z - 1][xVert].depth;
-		noWater = noWater && (hT == 0);
 	}
 
-	return (hL + hR + hB + hT) / 4.0 + _terrain.getHeight(x, z);
+	waterDepth = (hL + hR + hB + hT) / 4.0;
+
+	return waterDepth + _terrain.getHeight(x, z);
 }
 
 glm::vec3	Water::_calculateNormal(uint32_t x, uint32_t z) {
