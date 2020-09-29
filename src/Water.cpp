@@ -88,9 +88,11 @@ bool	Water::init() {
 			_waterCols[v][u].depth = 0;
 
 			// retrieve terrain height
-			uint32_t tU = (uint32_t)((u + 0.5) * _gridSpace.x);
-			uint32_t tV = (uint32_t)((v + 0.5) * _gridSpace.y);
-			_waterCols[v][u].terrainH = _terrain.getHeight(tU, tV);
+			_waterCols[v][u].terrainH = _terrain.getHeight(u, v);
+			_waterCols[v][u].terrainH += _terrain.getHeight(u+1, v);
+			_waterCols[v][u].terrainH += _terrain.getHeight(u, v+1);
+			_waterCols[v][u].terrainH += _terrain.getHeight(u+1, v+1);
+			_waterCols[v][u].terrainH /= 4;
 
 			// init wave water columns
 			if (_scenario == FlowScenario::WAVE) {
@@ -655,49 +657,41 @@ float	Water::_calculateHeight(uint32_t x, uint32_t z, bool & noWater) {
 	if (x != 0) {
 		hL = _waterCols[zHoriz][x - 1].depth;
 		noWater = noWater && (hL == 0);
-		hL += _waterCols[zHoriz][x - 1].terrainH;
 	}
 	else {
-		hL = _waterCols[zHoriz][x].depth;
+		hL = _waterCols[zHoriz][0].depth;
 		noWater = noWater && (hL == 0);
-		hL += _waterCols[zHoriz][x].terrainH;
 	}
 	// hR
 	if (x < WATER_GRID_RES.x) {
 		hR = _waterCols[zHoriz][x].depth;
 		noWater = noWater && (hR == 0);
-		hR += _waterCols[zHoriz][x].terrainH;
 	}
 	else {
 		hR = _waterCols[zHoriz][x - 1].depth;
 		noWater = noWater && (hR == 0);
-		hR += _waterCols[zHoriz][x - 1].terrainH;
 	}
 	uint32_t xVert = x < WATER_GRID_RES.x ? x : x - 1;
 	// hT
 	if (z != 0) {
 		hB = _waterCols[z - 1][xVert].depth;
 		noWater = noWater && (hB == 0);
-		hB += _waterCols[z - 1][xVert].terrainH;
 	}
 	else {
-		hB = _waterCols[z][xVert].depth;
+		hB = _waterCols[0][xVert].depth;
 		noWater = noWater && (hB == 0);
-		hB += _waterCols[z][xVert].terrainH;
 	}
 	// hB
 	if (z < WATER_GRID_RES.y) {
 		hT = _waterCols[z][xVert].depth;
 		noWater = noWater && (hT == 0);
-		hT += _waterCols[z][xVert].terrainH;
 	}
 	else {
 		hT = _waterCols[z - 1][xVert].depth;
 		noWater = noWater && (hT == 0);
-		hT += _waterCols[z - 1][xVert].terrainH;
 	}
 
-	return (hL + hR + hB + hT) / 4.0;
+	return (hL + hR + hB + hT) / 4.0 + _terrain.getHeight(x, z);
 }
 
 glm::vec3	Water::_calculateNormal(uint32_t x, uint32_t z) {
