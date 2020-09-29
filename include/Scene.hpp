@@ -33,6 +33,7 @@ class Scene {
 		uint16_t	getTerrainId() const;
 		uint16_t	getScenarioId() const;
 		bool	getPause() const;
+		float	getOrbitDistance() const;
 
 	private:
 		bool	_update();

@@ -14,6 +14,7 @@
 #include "Gui.hpp"
 #include "Material.hpp"
 
+class Scene;
 class Water;
 
 struct	TerrainVert {
@@ -30,7 +31,7 @@ struct	TerrainVert {
  */
 class Terrain {
 	public:
-		Terrain(std::string mapPath, Gui & gui);
+		Terrain(std::string mapPath, Gui & gui, Scene & scene);
 		virtual ~Terrain();
 		Terrain(Terrain const &src);
 		Terrain &operator=(Terrain const &rhs);
@@ -40,8 +41,10 @@ class Terrain {
 		bool	draw(bool wireframe = false);
 		void	setScenario(uint16_t scenarioId);
 		float	getHeight(uint32_t u, uint32_t v) const;
+		bool	getNearHeight(float u, float v, float & height) const;
 		float	getMinHeight() const;
 		float	getMaxHeight() const;
+		float	getOrbitDistance() const;
 
 		// -- exceptions -------------------------------------------------------
 		/**
@@ -75,6 +78,7 @@ class Terrain {
 		static std::unique_ptr<Shader>	_sh;  /**< Shader */
 		static std::array<glm::vec3, 3>	_colors;
 		Gui				&_gui;
+		Scene			&_scene;
 		std::string		_mapPath;
 		SettingsJson	*_map;
 		std::unordered_set<glm::vec3>	_mapPoints;

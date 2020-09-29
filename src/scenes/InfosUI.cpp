@@ -57,8 +57,6 @@ InfosUI &InfosUI::operator=(InfosUI const &rhs) {
  * @return false if the init failed
  */
 bool InfosUI::init() {
-	bool leftButtonState, rightButtonState, scenarioButtonState;
-
 	glm::vec2 winSz = _gui.gameInfo.windowSize;
 	glm::vec2 pos, size, ui, sizeTmp;
 	glm::vec2 marg(4, 4);

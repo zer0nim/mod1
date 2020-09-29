@@ -22,7 +22,7 @@ bool	init(int ac, char const **av, Scene & scene, std::vector<Terrain *> & terra
 	// create Terrain object for each file argument
 	try {
 		for (std::string mapPath : mapsPath) {
-			terrains.push_back(new Terrain(mapPath, scene.getGui()));
+			terrains.push_back(new Terrain(mapPath, scene.getGui(), scene));
 		}
 	} catch(Terrain::TerrainException const & e) {
 		logErr(e.what());

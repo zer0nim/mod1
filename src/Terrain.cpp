@@ -1,12 +1,14 @@
 #include <algorithm>
 
 #include "Terrain.hpp"
+#include "Scene.hpp"
 #include "Water.hpp"
 
 // -- Constructors -------------------------------------------------------------
 
-Terrain::Terrain(std::string const mapPath, Gui & gui)
+Terrain::Terrain(std::string const mapPath, Gui & gui, Scene & scene)
 : _gui(gui),
+  _scene(scene),
   _mapPath(mapPath),
   _map(nullptr),
   _vao(0),
@@ -48,6 +50,7 @@ Terrain::~Terrain() {
 
 Terrain::Terrain(Terrain const &src)
 : _gui(src._gui),
+  _scene(src._scene),
   _map(nullptr),
   _vao(0),
   _vbo(0),
@@ -500,8 +503,20 @@ void	Terrain::setScenario(uint16_t scenarioId) {
 float	Terrain::getHeight(uint32_t u, uint32_t v) const {
 	return TERRAIN_H(u, v);
 }
+
+bool	Terrain::getNearHeight(float u, float v, float & height) const {
+	int32_t x = std::round(u);
+	int32_t z = std::round(v);
+	if (x >= 0 && x < BOX_MAX_SIZE.x && z >= 0 && z < BOX_MAX_SIZE.z) {
+		height = TERRAIN_H(x, z);
+		return true;
+	}
+	return false;
+}
+
 float	Terrain::getMinHeight() const { return _minH; }
 float	Terrain::getMaxHeight() const { return _maxH; }
+float	Terrain::getOrbitDistance() const { return _scene.getOrbitDistance(); }
 
 // -- exceptions ---------------------------------------------------------------
 /**

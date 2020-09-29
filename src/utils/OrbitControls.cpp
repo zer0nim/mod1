@@ -120,3 +120,6 @@ void	OrbitControls::setTarget(glm::vec3 target) {
 	setDistance(_distance, _minDistance, _maxDistance);
 	_cam.lookAt(_target);
 }
+
+// -- getters ------------------------------------------------------------------
+float	OrbitControls::getDistance() const { return _distance; }

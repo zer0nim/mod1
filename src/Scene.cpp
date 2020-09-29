@@ -169,6 +169,7 @@ uint16_t	Scene::getFps() const {
 uint16_t	Scene::getTerrainId() const { return _terrainId; }
 uint16_t	Scene::getScenarioId() const { return _scenarioId; }
 bool	Scene::getPause() const { return _pause; }
+float	Scene::getOrbitDistance() const { return _orbitControls->getDistance(); }
 
 // -- UiState ------------------------------------------------------------------
 UiState::UiState() {

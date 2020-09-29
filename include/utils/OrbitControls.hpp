@@ -24,6 +24,7 @@ class OrbitControls {
 		bool	update(float dtTime);
 		void	setDistance(int32_t dist, int32_t min, int32_t max);
 		void	setTarget(glm::vec3 target);
+		float	getDistance() const;
 
 	private:
 		glm::vec3	_target;

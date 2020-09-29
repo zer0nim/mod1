@@ -30,6 +30,7 @@ namespace FlowScenario {
 		WAVE,
 		RAINING,
 		DRAIN,
+		SANDBOX,
 		COUNT
 	};
 }  // namespace FlowScenario
@@ -92,6 +93,7 @@ class Water {
 
 		float	_currentRiseH;
 		std::chrono::milliseconds	_lastRainUpdate;
+		float	_maxTerrainCenterDist;
 
 		void	_scenarioUpdate(float dtTime);
 		void	_updateFlow(uint32_t u, uint32_t v, float dtTime);

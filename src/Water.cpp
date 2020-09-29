@@ -2,6 +2,7 @@
 #include <cstdlib>
 
 #include "Water.hpp"
+#include "MouseRaycast.hpp"
 
 // -- const --------------------------------------------------------------------
 // space between grid points
@@ -19,7 +20,8 @@ const std::string	Water::flowScenarioName[] = {
 	"even rise",
 	"wave",
 	"raining",
-	"drain"
+	"drain",
+	"sandbox"
 };
 
 // -- members ------------------------------------------------------------------
@@ -45,6 +47,8 @@ Water::Water(Terrain & terrain, Gui & gui)
 	_waterCols = std::vector< std::vector<WaterColum> >(
 		WATER_GRID_RES.y, std::vector<WaterColum>(WATER_GRID_RES.x, WaterColum()));
 	_lastRainUpdate = getMs();
+	_maxTerrainCenterDist = std::max(std::max(BOX_MAX_SIZE.x, BOX_MAX_SIZE.y),
+		BOX_MAX_SIZE.z) / 2;
 }
 
 Water::~Water() {
@@ -162,6 +166,24 @@ void	Water::_scenarioUpdate(float dtTime) {
 					_waterCols[v][u].depth -= drainSpeed * dtTime;
 					_waterCols[v][u].depth = std::max(0.0f, _waterCols[v][u].depth);
 				}
+			}
+		}
+	}
+	else if (_scenario == FlowScenario::SANDBOX) {
+		if (Inputs::getLeftClickDown()) {
+			// init ray
+			glm::vec3 rayWord = MouseRaycast::calcMouseRay(_gui);
+			float orbitDist = _terrain.getOrbitDistance();
+			float len = orbitDist + _maxTerrainCenterDist + 2;
+
+			glm::vec3 intersection;
+			// add water on raycast hit
+			if (MouseRaycast::updateTerrainPos(_terrain, _gui.cam->pos, rayWord, len, intersection)) {
+				glm::vec2 waterGrid(intersection.x, intersection.z);
+				waterGrid.x = std::round(intersection.x / _gridSpace.x - 0.5);
+				waterGrid.y = std::round(intersection.z / _gridSpace.y - 0.5);
+
+				_waterCols[waterGrid.y][waterGrid.x].depth += 10;
 			}
 		}
 	}
