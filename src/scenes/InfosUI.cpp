@@ -67,7 +67,7 @@ bool InfosUI::init() {
 
 		// fps text
 		str = std::to_string(_fps) + "fps";
-		ui.x = ABaseUI::strWidth(UI_FONT, str, UI_FONT_SCALE) + 4;
+		ui.x = ABaseUI::strWidth(UI_FONT, str, UI_FONT_SCALE) + marg.x;
 		size = {ui.x, ui.y};
 		pos = {winSz.x - marg.x - size.x, winSz.y - marg.y - ui.y};
 		_fpsText = &addText(pos, size, str);
@@ -80,7 +80,7 @@ bool InfosUI::init() {
 
 		// map text
 		str = "map " + std::to_string(_scene.getTerrainId() + 1);
-		ui.x = ABaseUI::strWidth(UI_FONT, str, UI_FONT_SCALE) + 4;
+		ui.x = ABaseUI::strWidth(UI_FONT, str, UI_FONT_SCALE) + marg.x;
 		size = {ui.x, ui.y};
 		sizeTmp = size;
 		pos = {winSz.x / 2 - size.x / 2, winSz.y - marg.y - ui.y};
@@ -96,7 +96,7 @@ bool InfosUI::init() {
 		str = "<";
 		ui.x = ABaseUI::strWidth(UI_FONT, str, UI_FONT_SCALE) + 12;
 		size = {ui.x, ui.y};
-		pos = {winSz.x / 2 - sizeTmp.x / 2 - size.x - marg.x, winSz.y - 4 - ui.y};
+		pos = {winSz.x / 2 - sizeTmp.x / 2 - size.x - marg.x, winSz.y - marg.y - ui.y};
 		addButton(pos, size, str)
 			.setKeyLeftClickScancode(Inputs::getKeySdlScancode(InputType::DECREMENT_1))
 			.addButtonLeftListener(&_uiState.leftBtn)
@@ -107,7 +107,7 @@ bool InfosUI::init() {
 
 		// right button
 		str = ">";
-		pos = {winSz.x / 2 + sizeTmp.x / 2 + marg.x, winSz.y - 4 - ui.y};
+		pos = {winSz.x / 2 + sizeTmp.x / 2 + marg.x, winSz.y - marg.y - ui.y};
 		addButton(pos, size, str)
 			.setKeyLeftClickScancode(Inputs::getKeySdlScancode(InputType::INCREMENT_1))
 			.addButtonLeftListener(&_uiState.rightBtn)
@@ -121,7 +121,7 @@ bool InfosUI::init() {
 		ui.x = ABaseUI::strWidth(UI_FONT, str, UI_FONT_SCALE) + 12;
 		size = {ui.x, ui.y};
 		sizeTmp = size;
-		pos = {marg.x, winSz.y - 4 - ui.y};
+		pos = {marg.x, winSz.y - marg.y - ui.y};
 		addButton(pos, size, str)
 			.setKeyLeftClickScancode(Inputs::getKeySdlScancode(InputType::GOTO_MENU))
 			.addButtonLeftListener(&_uiState.scenarioBtn)
@@ -132,7 +132,7 @@ bool InfosUI::init() {
 
 		// scenario text
 		str = Water::flowScenarioName[_scene.getScenarioId()];
-		ui.x = ABaseUI::strWidth(UI_FONT, str, UI_FONT_SCALE) + 4;
+		ui.x = ABaseUI::strWidth(UI_FONT, str, UI_FONT_SCALE) + marg.x;
 		size = {ui.x, ui.y};
 		pos = {sizeTmp.x + marg.x, winSz.y - marg.y - ui.y};
 		_scenarioText = &addText(pos, size, str);
@@ -140,6 +140,20 @@ bool InfosUI::init() {
 			.setTextOutline(.17)
 			.setTextAlign(TextAlign::LEFT)
 			.setTextScale(UI_FONT_SCALE)
+			.setTextColor(UI_TEXT_COLOR)
+			.setZ(1);
+
+		// sandbox keys ui
+		str = "press (" + Inputs::getKeyName(InputType::MODIFIER_1) + " + Left Click) to add water";
+		float fontScale = UI_FONT_SCALE * 0.9;
+		ui.x = ABaseUI::strWidth(UI_FONT, str, fontScale) + marg.x;
+		size = {ui.x, ui.y};
+		pos = {marg.x, winSz.y - marg.y - ui.y - marg.y * 12};
+		_sandboxText = &addText(pos, size, str);
+		_sandboxText->setTextFont(UI_FONT)
+			.setTextOutline(.17)
+			.setTextAlign(TextAlign::LEFT)
+			.setTextScale(fontScale)
 			.setTextColor(UI_TEXT_COLOR)
 			.setZ(1);
 
@@ -176,7 +190,7 @@ bool InfosUI::init() {
 
 			// _pauseTextKey
 			str = "press " + Inputs::getKeyName(InputType::ACTION) + " to play";
-			ui.x = ABaseUI::strWidth(UI_FONT, str, UI_FONT_SCALE) + 4;
+			ui.x = ABaseUI::strWidth(UI_FONT, str, UI_FONT_SCALE) + marg.x;
 			size = {ui.x, ui.y};
 			pos = {winSz.x / 2 - size.x / 2, pos.y - size.y - marg.y * 2};
 			_pauseTextKey = &addText(pos, size, str);
@@ -228,6 +242,9 @@ bool InfosUI::update(float dtTime) {
 	_pauseRect->setEnabled(pause);
 	_pauseText->setEnabled(pause);
 	_pauseTextKey->setEnabled(pause);
+
+	// update sandbox keys ui
+	_sandboxText->setEnabled(_scene.isSandboxScenario());
 
 	return true;
 }

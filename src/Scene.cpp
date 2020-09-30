@@ -172,7 +172,7 @@ uint16_t	Scene::getTerrainId() const { return _terrainId; }
 uint16_t	Scene::getScenarioId() const { return _scenarioId; }
 bool	Scene::getPause() const { return _pause; }
 float	Scene::getOrbitDistance() const { return _orbitControls->getDistance(); }
-
+bool	Scene::isSandboxScenario() const { return _scenarioId == FlowScenario::SANDBOX; }
 // -- UiState ------------------------------------------------------------------
 UiState::UiState() {
 	leftBtn = false;

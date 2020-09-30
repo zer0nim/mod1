@@ -43,6 +43,7 @@ class InfosUI : public AUserInterface {
 		RectUI *	_pauseRect;
 		TextUI *	_pauseText;
 		TextUI *	_pauseTextKey;
+		TextUI *	_sandboxText;
 };
 
 #endif  // INFOSUI_HPP_

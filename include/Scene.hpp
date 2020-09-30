@@ -34,6 +34,7 @@ class Scene {
 		uint16_t	getScenarioId() const;
 		bool	getPause() const;
 		float	getOrbitDistance() const;
+		bool	isSandboxScenario() const;
 
 	private:
 		bool	_update();
