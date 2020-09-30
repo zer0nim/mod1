@@ -3,7 +3,7 @@
 
 #define WATER_GRID_RES glm::vec2(BOX_MAX_SIZE.x - 1, BOX_MAX_SIZE.z - 1)
 #define WATER_H(u, v) (_vertices[(v) * (WATER_GRID_RES.x + 1) + (u)].pos.y)
-#define WATER_MIN_DISPLAY_H 0.02
+#define WATER_MIN_DISPLAY_H 0.01
 
 #include <vector>
 

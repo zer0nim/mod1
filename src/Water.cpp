@@ -143,15 +143,15 @@ void	Water::_scenarioUpdate(float dtTime) {
 		_currentRiseH += riseSpeed * dtTime;
 	}
 	else if (_scenario == FlowScenario::RAINING) {
-		float rainAmount = 1.8;
+		float rainAmount = 1.0;
 
 		// rain drop
-		if (getMs().count() - _lastRainUpdate.count() > 80) {
+		if (getMs().count() - _lastRainUpdate.count() > 100) {
 			_lastRainUpdate = getMs();
 
 			for (uint32_t v = 0; v < WATER_GRID_RES.y; ++v) {
 				for (uint32_t u = 0; u < WATER_GRID_RES.x; ++u) {
-					if (rand() % 100 < 8) {
+					if (rand() % 100 < 30) {
 						_waterCols[v][u].depth += rainAmount * dtTime;
 					}
 				}
@@ -432,7 +432,7 @@ bool	Water::_initMesh() {
 		for (uint16_t x = 0; x < WATER_GRID_RES.x + 1; ++x) {
 			WaterVert vert;
 			vert.pos = {_gridSpace.x * x, _calculateHeight(x, z, waterDepth), _gridSpace.y * z};
-			vert.visible = waterDepth < WATER_MIN_DISPLAY_H ? waterDepth / WATER_MIN_DISPLAY_H : 1.0;
+			vert.visible = waterDepth <= WATER_MIN_DISPLAY_H ? 0.0 : 1.0;
 			_vertices.push_back(vert);
 		}
 	}
@@ -514,7 +514,7 @@ bool	Water::_updateMesh() {
 		uint16_t x = std::round(vert.pos.x / _gridSpace.x);
 		uint16_t z = std::round(vert.pos.z / _gridSpace.y);
 		vert.pos = glm::vec3(vert.pos.x, _calculateHeight(x, z, waterDepth), vert.pos.z);
-		vert.visible = waterDepth < WATER_MIN_DISPLAY_H ? waterDepth / WATER_MIN_DISPLAY_H : 1.0;
+		vert.visible = waterDepth <= WATER_MIN_DISPLAY_H ? 0.0 : 1.0;
 	}
 
 	// update normals
@@ -606,7 +606,7 @@ void	Water::_updateBorderVertices() {
 		float depth = _calculateHeight(x, 0, waterDepth);
 		vert.pos = {x * _gridSpace.x, depth, 0};
 		vert.norm = {0, 0, -1};
-		vert.visible = waterDepth < WATER_MIN_DISPLAY_H ? waterDepth / WATER_MIN_DISPLAY_H : 1.0;
+		vert.visible = waterDepth <= WATER_MIN_DISPLAY_H ? 0.0 : 1.0;
 		_verticesB[i] = vert;
 		vert.pos = {vert.pos.x, 0.0, vert.pos.z};
 		_verticesB[i + meshWidth] = vert;
@@ -616,7 +616,7 @@ void	Water::_updateBorderVertices() {
 		float depth = _calculateHeight(WATER_GRID_RES.x, z, waterDepth);
 		vert.pos = {WATER_GRID_RES.x * _gridSpace.x, depth, z * _gridSpace.y};
 		vert.norm = {1, 0, 0};
-		vert.visible = waterDepth < WATER_MIN_DISPLAY_H ? waterDepth / WATER_MIN_DISPLAY_H : 1.0;
+		vert.visible = waterDepth <= WATER_MIN_DISPLAY_H ? 0.0 : 1.0;
 		_verticesB[i] = vert;
 		vert.pos = {vert.pos.x, 0.0, vert.pos.z};
 		_verticesB[i + meshWidth] = vert;
@@ -626,7 +626,7 @@ void	Water::_updateBorderVertices() {
 		float depth = _calculateHeight(x, WATER_GRID_RES.y, waterDepth);
 		vert.pos = {x * _gridSpace.x, depth, WATER_GRID_RES.y * _gridSpace.y};
 		vert.norm = {0, 0, 1};
-		vert.visible = waterDepth < WATER_MIN_DISPLAY_H ? waterDepth / WATER_MIN_DISPLAY_H : 1.0;
+		vert.visible = waterDepth <= WATER_MIN_DISPLAY_H ? 0.0 : 1.0;
 		_verticesB[i] = vert;
 		vert.pos = {vert.pos.x, 0.0, vert.pos.z};
 		_verticesB[i + meshWidth] = vert;
@@ -636,7 +636,7 @@ void	Water::_updateBorderVertices() {
 		float depth = _calculateHeight(0, z, waterDepth);
 		vert.pos = {0, depth, z * _gridSpace.y};
 		vert.norm = {-1, 0, 0};
-		vert.visible = waterDepth < WATER_MIN_DISPLAY_H ? waterDepth / WATER_MIN_DISPLAY_H : 1.0;
+		vert.visible = waterDepth <= WATER_MIN_DISPLAY_H ? 0.0 : 1.0;
 		_verticesB[i] = vert;
 		vert.pos = {vert.pos.x, 0.0, vert.pos.z};
 		_verticesB[i + meshWidth] = vert;
