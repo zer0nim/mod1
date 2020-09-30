@@ -145,7 +145,6 @@ bool	Terrain::draw(bool wireframe) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // reset polygon mode
 	glBindVertexArray(0);
 
-
 	_sh->unuse();
 
 	_water->draw(wireframe);

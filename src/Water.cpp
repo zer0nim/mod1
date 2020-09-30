@@ -182,9 +182,8 @@ void	Water::_scenarioUpdate(float dtTime) {
 			// add water on raycast hit
 			if (MouseRaycast::updateTerrainPos(_terrain, _gui.cam->pos, rayWord, len, intersection)) {
 				glm::vec2 waterGrid(intersection.x, intersection.z);
-				waterGrid.x = std::round(intersection.x / _gridSpace.x - 0.5);
-				waterGrid.y = std::round(intersection.z / _gridSpace.y - 0.5);
-
+				waterGrid.x = std::round(intersection.x / _gridSpace.x);
+				waterGrid.y = std::round(intersection.z / _gridSpace.y);
 				_waterCols[waterGrid.y][waterGrid.x].depth += 10;
 			}
 		}
@@ -646,42 +645,36 @@ void	Water::_updateBorderVertices() {
 }
 
 float	Water::_calculateHeight(uint32_t x, uint32_t z, float & waterDepth) {
-	float hL, hR, hB, hT;
+	float tL, tR, bL, bR;
+	float terrainH = 0.0f;
+	glm::vec2 uv;
 
-	uint32_t zHoriz = z < WATER_GRID_RES.y ? z : z - 1;
-	// hL
-	if (x != 0) {
-		hL = _waterCols[zHoriz][x - 1].depth;
-	}
-	else {
-		hL = _waterCols[zHoriz][0].depth;
-	}
-	// hR
-	if (x < WATER_GRID_RES.x) {
-		hR = _waterCols[zHoriz][x].depth;
-	}
-	else {
-		hR = _waterCols[zHoriz][x - 1].depth;
-	}
-	uint32_t xVert = x < WATER_GRID_RES.x ? x : x - 1;
-	// hT
-	if (z != 0) {
-		hB = _waterCols[z - 1][xVert].depth;
-	}
-	else {
-		hB = _waterCols[0][xVert].depth;
-	}
-	// hB
-	if (z < WATER_GRID_RES.y) {
-		hT = _waterCols[z][xVert].depth;
-	}
-	else {
-		hT = _waterCols[z - 1][xVert].depth;
-	}
+	// top
+	uv.y = z != 0 ? z - 1 : 0;
+	// tL, (x-1, y-1)
+	uv.x = x != 0 ? x - 1 : 0;
+	tL = _waterCols[uv.y][uv.x].depth;
+	terrainH += _waterCols[uv.y][uv.x].terrainH;
+	// tR, (x, y-1)
+	uv.x = x < WATER_GRID_RES.x ? x : x - 1;
+	tR = _waterCols[uv.y][uv.x].depth;
+	terrainH += _waterCols[uv.y][uv.x].terrainH;
 
-	waterDepth = (hL + hR + hB + hT) / 4.0;
+	// bottom
+	uv.y = z < WATER_GRID_RES.y ? z : z - 1;
+	// bL, (x-1, y)
+	uv.x = x != 0 ? x - 1 : 0;
+	bL = _waterCols[uv.y][uv.x].depth;
+	terrainH += _waterCols[uv.y][uv.x].terrainH;
+	// bR, (x, y)
+	uv.x = x < WATER_GRID_RES.x ? x : x - 1;
+	bR = _waterCols[uv.y][uv.x].depth;
+	terrainH += _waterCols[uv.y][uv.x].terrainH;
 
-	return waterDepth + _terrain.getHeight(x, z);
+	waterDepth = (tL + tR + bL + bR) / 4.0;
+	terrainH /= 4;
+
+	return waterDepth + terrainH;
 }
 
 glm::vec3	Water::_calculateNormal(uint32_t x, uint32_t z) {
