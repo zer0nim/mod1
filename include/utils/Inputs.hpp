@@ -18,6 +18,8 @@
 #define DEFAULT_MENU		SDL_SCANCODE_TAB
 #define DEFAULT_INCREMENT_1	SDL_SCANCODE_RIGHT
 #define DEFAULT_DECREMENT_1	SDL_SCANCODE_LEFT
+#define DEFAULT_MODIFIER_1	SDL_SCANCODE_LSHIFT
+#define DEFAULT_MODIFIER_2	SDL_SCANCODE_LCTRL
 
 namespace InputType {
 	/**
@@ -31,6 +33,8 @@ namespace InputType {
 		GOTO_MENU,
 		INCREMENT_1,
 		DECREMENT_1,
+		MODIFIER_1,
+		MODIFIER_2,
 		NB_INPUTS  // need to be the last element
 	};
 }  // namespace InputType

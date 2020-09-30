@@ -55,6 +55,7 @@ AUserInterface &AUserInterface::operator=(AUserInterface const &rhs) {
  * @return false if there are an error in update
  */
 bool	AUserInterface::update(float dtTime) {
+	(void)dtTime;
 	for (auto it = _buttons.begin(); it != _buttons.end(); it++) {
 		(*it)->update();
 	}

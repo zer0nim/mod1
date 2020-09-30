@@ -172,7 +172,7 @@ void	Water::_scenarioUpdate(float dtTime) {
 		}
 	}
 	else if (_scenario == FlowScenario::SANDBOX) {
-		if (Inputs::getLeftClickDown()) {
+		if (Inputs::getLeftClick() && Inputs::getKey(InputType::MODIFIER_1)) {
 			// init ray
 			glm::vec3 rayWord = MouseRaycast::calcMouseRay(_gui);
 			float orbitDist = _terrain.getOrbitDistance();
@@ -184,7 +184,11 @@ void	Water::_scenarioUpdate(float dtTime) {
 				glm::vec2 waterGrid(intersection.x, intersection.z);
 				waterGrid.x = std::round(intersection.x / _gridSpace.x);
 				waterGrid.y = std::round(intersection.z / _gridSpace.y);
-				_waterCols[waterGrid.y][waterGrid.x].depth += 10;
+				if (waterGrid.x >= 0 && waterGrid.x < WATER_GRID_RES.x &&
+					waterGrid.y >= 0 && waterGrid.y < WATER_GRID_RES.y)
+				{
+					_waterCols[waterGrid.y][waterGrid.x].depth += 5;
+				}
 			}
 		}
 	}

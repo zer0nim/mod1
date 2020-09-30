@@ -139,8 +139,10 @@ bool	Scene::_update() {
 	}
 
 	// orbit controls
-	if (!_orbitControls->update(_dtTime))
-		return false;
+	if (!Inputs::getKey(InputType::MODIFIER_1)) {
+		if (!_orbitControls->update(_dtTime))
+			return false;
+	}
 	return true;
 }
 

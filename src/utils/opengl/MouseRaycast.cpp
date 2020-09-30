@@ -58,13 +58,10 @@ namespace MouseRaycast {
 	bool	updateTerrainPos(Terrain & terrain, glm::vec3 camPos, glm::vec3 & ray,
 		float len, glm::vec3 & intersection)
 	{
-		if (intersectionInRange(terrain, camPos, 0, len, ray)) {
-			intersection = binarySearch(terrain, camPos, 0, 0, len, ray);
-			intersection.x = std::round(intersection.x);
-			intersection.z = std::round(intersection.z);
-			return (intersection.x >= 0 && intersection.x < BOX_MAX_SIZE.x &&
-				intersection.z >= 0 && intersection.z < BOX_MAX_SIZE.z);
-		}
-		return false;
+		intersection = binarySearch(terrain, camPos, 0, 0, len, ray);
+		intersection.x = std::round(intersection.x);
+		intersection.z = std::round(intersection.z);
+		return (intersection.x >= 0 && intersection.x < BOX_MAX_SIZE.x &&
+			intersection.z >= 0 && intersection.z < BOX_MAX_SIZE.z);
 	}
 }

@@ -8,6 +8,8 @@ const std::string	Inputs::input_type_name[] = {
 	"menu",
 	"increment_1",
 	"decrement_1",
+	"modifier_1",
+	"modifier_2",
 };
 const SDL_Scancode	Inputs::default_keys[] = {
 	DEFAULT_ACTION,
@@ -16,6 +18,8 @@ const SDL_Scancode	Inputs::default_keys[] = {
 	DEFAULT_MENU,
 	DEFAULT_INCREMENT_1,
 	DEFAULT_DECREMENT_1,
+	DEFAULT_MODIFIER_1,
+	DEFAULT_MODIFIER_2,
 };
 const std::string	Inputs::configFile = CONTROLS_FILE;
 
@@ -49,6 +53,10 @@ Inputs::Inputs()
 		.setMin(4).setMax(286).setDescription("increment action 1");
 	_controls.j("keys").add<int64_t>("decrement_1", DEFAULT_DECREMENT_1) \
 		.setMin(4).setMax(286).setDescription("decrement action 1");
+	_controls.j("keys").add<int64_t>("modifier_1", DEFAULT_MODIFIER_1) \
+		.setMin(4).setMax(286).setDescription("modifier key 1");
+	_controls.j("keys").add<int64_t>("modifier_2", DEFAULT_MODIFIER_2) \
+		.setMin(4).setMax(286).setDescription("modifier key 2");
 	try {
 		if (!_controls.loadFile(Inputs::configFile)) {
 			logWarn("Invalid value in " << Inputs::configFile << ".");
@@ -64,6 +72,8 @@ Inputs::Inputs()
 		{ static_cast<SDL_Scancode>(_controls.j("keys").i("menu")), InputType::GOTO_MENU },
 		{ static_cast<SDL_Scancode>(_controls.j("keys").i("increment_1")), InputType::INCREMENT_1 },
 		{ static_cast<SDL_Scancode>(_controls.j("keys").i("decrement_1")), InputType::DECREMENT_1 },
+		{ static_cast<SDL_Scancode>(_controls.j("keys").i("modifier_1")), InputType::MODIFIER_1 },
+		{ static_cast<SDL_Scancode>(_controls.j("keys").i("modifier_2")), InputType::MODIFIER_2 },
 	};
 	_used_scan = {
 		_controls.j("keys").i("action"),
@@ -72,6 +82,8 @@ Inputs::Inputs()
 		_controls.j("keys").i("menu"),
 		_controls.j("keys").i("increment_1"),
 		_controls.j("keys").i("decrement_1"),
+		_controls.j("keys").i("modifier_1"),
+		_controls.j("keys").i("modifier_2"),
 	};
 	_controls.saveToFile(Inputs::configFile);
 
@@ -535,6 +547,8 @@ void				Inputs::_resetKeys() {
 		{ static_cast<SDL_Scancode>(_controls.j("keys").i("menu")), InputType::Enum::GOTO_MENU },
 		{ static_cast<SDL_Scancode>(_controls.j("keys").i("increment_1")), InputType::Enum::INCREMENT_1 },
 		{ static_cast<SDL_Scancode>(_controls.j("keys").i("decrement_1")), InputType::Enum::DECREMENT_1 },
+		{ static_cast<SDL_Scancode>(_controls.j("keys").i("modifier_1")), InputType::Enum::MODIFIER_1 },
+		{ static_cast<SDL_Scancode>(_controls.j("keys").i("modifier_2")), InputType::Enum::MODIFIER_2 },
 	};
 	_used_scan = {
 		_controls.j("keys").i("action"),
@@ -543,6 +557,8 @@ void				Inputs::_resetKeys() {
 		_controls.j("keys").i("menu"),
 		_controls.j("keys").i("increment_1"),
 		_controls.j("keys").i("decrement_1"),
+		_controls.j("keys").i("modifier_1"),
+		_controls.j("keys").i("modifier_2"),
 	};
 	_controls.saveToFile(Inputs::configFile);
 }
