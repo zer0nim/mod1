@@ -1,6 +1,6 @@
 # mod1 [[42](https://www.42.fr/) project]
 
-![demo]()
+![demo](../assets/readme_assets/screenshot.png?raw=true)
 
 ## 🌊 Project
 
@@ -34,6 +34,14 @@ usage: ./mod1 <map1.mod1> <map2.mod1> ...
  ```
 
 If you want, you can edit some settings (resolution, keys, ...). After starting the program at least once, modify the `configs/settings.json` and/or `configs/controls.json` files.
+
+### Wave demo
+![demo wave 1](../assets/readme_assets/wave1.gif?raw=true)
+![demo wave 2](../assets/readme_assets/wave2.gif?raw=true)
+### Sandbox demo, add water were you want
+![demo sandbox](../assets/readme_assets/sandbox1.gif?raw=true)
+### Drain demo, water is drained from the ground below a certain height
+![demo drain](../assets/readme_assets/drain1.gif?raw=true)
 
 ## 📔 References
 
