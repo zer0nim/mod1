@@ -47,8 +47,10 @@ bool	OrbitControls::update(float dtTime) {
 
 			// horizontal rotation
 			float angle = -offset.x * speed * dtTime;
-			transform.rotateAround(_target, {0, 1, 0}, angle);
-			_cam.pos = transform.getPos();
+			if (angle > 0.001f || angle < -0.001f) {
+				transform.rotateAround(_target, {0, 1, 0}, angle);
+				_cam.pos = transform.getPos();
+			}
 
 			// vertical rotation
 			angle = -offset.y * speed * dtTime;
@@ -59,15 +61,15 @@ bool	OrbitControls::update(float dtTime) {
 			else if (newVertAngle < 0) {
 				angle = _verticalAngle;
 			}
-			_verticalAngle -= angle;
 
-			if (angle != 0) {
+			if (angle > 0.001f || angle < -0.001f) {
 				transform.rotateAround(_target, _cam.right, angle);
 				_cam.pos = transform.getPos();
 			}
 
 			// look at target
 			_cam.lookAt(_target);
+			_verticalAngle = -_cam.pitch;
 		}
 
 		// distance (mouse wheel)
@@ -79,6 +81,9 @@ bool	OrbitControls::update(float dtTime) {
 			_distance = std::min(_maxDistance, _distance);
 			setDistance(_distance, _minDistance, _maxDistance);
 		}
+	}
+	else {
+		_mousePressed = false;
 	}
 
 	return true;
