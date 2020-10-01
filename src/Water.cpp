@@ -263,7 +263,7 @@ void	Water::_updateFlow(uint32_t u, uint32_t v, float dtTime) {
 			hDiff = freeWaterH;
 		}
 		// * comment for static cross-sectional area of the pipe
-		pipeCSA = std::max(_gridSpace.x * freeWaterH, _gridArea);
+		pipeCSA = _gridSpace.x * freeWaterH;
 
 		_waterCols[v][u].lFlow += pipeCSA * (_gravity / _pipeLen.x) * hDiff * dtTime;
 	}
@@ -296,7 +296,7 @@ void	Water::_updateFlow(uint32_t u, uint32_t v, float dtTime) {
 			hDiff = freeWaterH;
 		}
 		// * comment for static cross-sectional area of the pipe
-		pipeCSA = std::max(_gridSpace.y * freeWaterH, _gridArea);
+		pipeCSA = _gridSpace.y * freeWaterH;
 
 		_waterCols[v][u].tFlow += pipeCSA * (_gravity / _pipeLen.y) * hDiff * dtTime;
 	}
