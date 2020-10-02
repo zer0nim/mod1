@@ -13,7 +13,8 @@ Scene::Scene(std::vector<Terrain *> & terrains)
   _dtTime(0.0f),
   _fps(60),
   _wireframeMode(false),
-  _orbitControls(nullptr) {
+  _orbitControls(nullptr),
+  _infosUI(nullptr) {
 	_terrainId = 0;
 	_scenarioId = 0;
 	_pause = true;
