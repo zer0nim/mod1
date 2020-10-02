@@ -1,4 +1,4 @@
-#version 410 core
+#version 330 core
 
 #define MAX_BONES 100
 #define NUM_BONES_PER_VERTEX 4

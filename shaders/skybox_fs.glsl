@@ -1,4 +1,4 @@
-#version 410 core
+#version 330 core
 
 #define NIGHTFOG mix(1.0, 0.2, nightProgress)
 

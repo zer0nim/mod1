@@ -78,6 +78,7 @@ class Gui {
 		bool	_initGameInfo();
 		bool	_initOpengl();
 		bool	_initShaders();
+		bool	_getMaxSamples(int & maxSamples);
 
 		static const int									_min_width = 800;  /**< Min screen width */
 		static const int									_min_height = 600;  /**< Min screen height */

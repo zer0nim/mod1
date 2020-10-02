@@ -1,4 +1,4 @@
-#version 410 core
+#version 330 core
 
 #define GAMMA 2.2
 #define NIGHT mix(1.0, 0.05, nightProgress)

@@ -165,8 +165,8 @@ bool	Gui::_initGameInfo() {
  */
 bool	Gui::_initOpengl() {
 	// opengl version 4.1
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 	// enable double buffering
@@ -174,15 +174,21 @@ bool	Gui::_initOpengl() {
 	SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-	// number of samples used for anti-aliasing
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
+	/* number of samples used for anti-aliasing */
+	// retieve maxSample
+	int maxSamples = 0;
+	if (!_getMaxSamples(maxSamples))
+		return false;
+	if (maxSamples >= 4) {
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
+	}
 
 	// create window
 	_win = SDL_CreateWindow(gameInfo.title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 		gameInfo.windowSize.x, gameInfo.windowSize.y, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
 	if (_win == nullptr) {
-		logErr("while loading OpenGL: " << SDL_GetError());
+		logErr("while creating OpenGL window: " << SDL_GetError());
 		return false;
 	}
 	if (s.j("graphics").b("fullscreen")) {
@@ -194,7 +200,7 @@ bool	Gui::_initOpengl() {
 	// create opengl context
 	_context = SDL_GL_CreateContext(_win);
 	if (_context == 0) {
-		logErr("while loading OpenGL: " << SDL_GetError());
+		logErr("while creating OpenGL context: " << SDL_GetError());
 		return false;
 	}
 	// init glad
@@ -203,11 +209,48 @@ bool	Gui::_initOpengl() {
 		return false;
 	}
 
-	glEnable(GL_MULTISAMPLE);  // anti aliasing
+	if (maxSamples >= 4) {
+		glEnable(GL_MULTISAMPLE);  // anti aliasing
+	}
 	glEnable(GL_CULL_FACE);  // face culling
 	glEnable(GL_BLEND);  // enable blending (used in textRender)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
+	return true;
+}
+
+bool	Gui::_getMaxSamples(int & maxSamples) {
+	_win = SDL_CreateWindow(gameInfo.title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+		gameInfo.windowSize.x, gameInfo.windowSize.y, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
+	if (_win == nullptr) {
+		logErr("[_getMaxSamples] while creating OpenGL window: " << SDL_GetError());
+		return false;
+	}
+
+	// create opengl context
+	_context = SDL_GL_CreateContext(_win);
+	if (_context == 0) {
+		logErr("[_getMaxSamples] while creating OpenGL context: " << SDL_GetError());
+		return false;
+	}
+	// init glad
+	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
+		logErr("[_getMaxSamples] while loading OpenGL: failed to init glad");
+		return false;
+	}
+
+	// retieve GL_MAX_SAMPLES
+	glGetIntegerv (GL_MAX_SAMPLES, &maxSamples);
+
+	// properly quit sdl
+	SDL_GL_DeleteContext(_context);
+	try {
+		SDL_DestroyWindow(_win);
+	}
+	catch (std::exception & e) {
+		logWarn("[_getMaxSamples] failed to exit proprely SDL window");
+		return false;
+	}
 	return true;
 }
 
